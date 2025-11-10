@@ -10,6 +10,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Gold Workshop Manager',
   description: 'Professional gold workshop management system',
+  icons: {
+    icon: '/trans.png',
+  },
 };
 
 export default function RootLayout({
