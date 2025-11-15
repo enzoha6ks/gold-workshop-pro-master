@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
 // "use client"
 
 // import { useState, useEffect } from "react"
@@ -33,6 +36,7 @@
   
 //   const { getVendorRemainingBalance } = useAppStore()
 
+<<<<<<< HEAD
 //   // Filter vendors with remaining balance > 0
 //   const vendorsWithBalance = pendingTransactions.filter(transaction => {
 //     const balance = getVendorRemainingBalance(transaction.vendor)
@@ -41,6 +45,10 @@
 
 //   // Get selected pending transaction
 //   const selectedTransaction = vendorsWithBalance.find(t => t.vendor === selectedVendor)
+=======
+//   // Get selected pending transaction
+//   const selectedTransaction = pendingTransactions.find(t => t.vendor === selectedVendor)
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
 
 //   // Calculate vendor's current remaining balance
 //   const vendorCurrentBalance = selectedVendor ? getVendorRemainingBalance(selectedVendor) : 0
@@ -50,7 +58,15 @@
 //     return total + (parseFloat(item.weight) || 0)
 //   }, 0)
 
+<<<<<<< HEAD
 //   // Calculate actual pure gold received from all purities (weight * purity / 999)
+=======
+//   // CORRECTED: Calculate expected pure gold from sent transaction (weight * purity / 999)
+//   const expectedPureGold = selectedTransaction ? 
+//     (selectedTransaction.weight * selectedTransaction.purity) / 999 : 0
+
+//   // CORRECTED: Calculate actual pure gold received from all purities (weight * purity / 999)
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
 //   const actualPureGold = purities.reduce((total, item) => {
 //     const weight = parseFloat(item.weight) || 0
 //     const purity = parseFloat(item.purity) || 0
@@ -102,6 +118,7 @@
 //       pureGoldContent: actualPureGold,
 //       remainingBalance: parseFloat(remainingBalance) || 0,
 //       notes,
+<<<<<<< HEAD
 //       // Store complete transaction history
 //       originalTransaction: {
 //         id: selectedTransaction.id,
@@ -119,6 +136,14 @@
 //       status: "completed",
 //       vendorCurrentBalance: vendorCurrentBalance,
 //       newBalance: newRemainingBalance
+=======
+//       originalSentWeight: selectedTransaction.weight,
+//       originalPurity: selectedTransaction.purity,
+//       receivedPurities: purities.filter(p => p.purity && p.weight),
+//       status: "completed",
+//       vendorCurrentBalance: vendorCurrentBalance, // Store current balance before this transaction
+//       newBalance: newRemainingBalance // Store new balance after this transaction
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
 //     }
 
 //     onReceive(transaction)
@@ -155,11 +180,16 @@
 //         </DialogHeader>
 
 //         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+<<<<<<< HEAD
 //           {/* Vendor Selection - Only show vendors with balance */}
+=======
+//           {/* Vendor Selection */}
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
 //           <div className="space-y-2 sm:space-y-3">
 //             <Label htmlFor="vendor" className="text-sm sm:text-base">Select Vendor *</Label>
 //             <Select value={selectedVendor} onValueChange={setSelectedVendor}>
 //               <SelectTrigger className="w-full">
+<<<<<<< HEAD
 //                 <SelectValue placeholder={
 //                   vendorsWithBalance.length === 0 
 //                     ? "No vendors with pending balance" 
@@ -199,6 +229,25 @@
 //           </div>
 
 //           {/* Rest of your form remains the same... */}
+=======
+//                 <SelectValue placeholder="Choose vendor with pending transactions" />
+//               </SelectTrigger>
+//               <SelectContent>
+//                 {pendingTransactions.map((transaction) => (
+//                   <SelectItem key={transaction.id} value={transaction.vendor}>
+//                     <div className="flex flex-col">
+//                       <span className="font-medium">{transaction.vendor}</span>
+//                       <span className="text-xs text-slate-500">
+//                         {transaction.weight}g sent ({transaction.purity} purity)
+//                       </span>
+//                     </div>
+//                   </SelectItem>
+//                 ))}
+//               </SelectContent>
+//             </Select>
+//           </div>
+
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
 //           {/* Vendor Balance Summary */}
 //           {selectedVendor && (
 //             <Card className="bg-amber-50 border-amber-200">
@@ -229,6 +278,10 @@
 //             </Card>
 //           )}
 
+<<<<<<< HEAD
+=======
+//           {/* ... rest of your form content (Original Sent Details, Received Gold, Balance Summary, etc.) remains the same ... */}
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
 //           {/* Original Sent Details */}
 //           {selectedTransaction && (
 //             <Card className="bg-blue-50 border-blue-200">
@@ -251,7 +304,11 @@
 //                   <div>
 //                     <span className="text-slate-600 text-xs sm:text-sm">Pure Gold Content:</span>
 //                     <p className="font-medium text-green-600 text-sm sm:text-base">
+<<<<<<< HEAD
 //                       {((selectedTransaction.weight * selectedTransaction.purity) / 999).toFixed(3)}g
+=======
+//                       {expectedPureGold.toFixed(3)}g
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
 //                     </p>
 //                   </div>
 //                   <div>
@@ -344,9 +401,13 @@
 //                   <>
 //                     <div className="flex justify-between items-center">
 //                       <span className="text-xs sm:text-sm">Expected Pure Gold:</span>
+<<<<<<< HEAD
 //                       <span className="font-medium text-sm sm:text-base">
 //                         {((selectedTransaction.weight * selectedTransaction.purity) / 999).toFixed(3)}g
 //                       </span>
+=======
+//                       <span className="font-medium text-sm sm:text-base">{expectedPureGold.toFixed(3)}g</span>
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
 //                     </div>
 //                     <div className="flex justify-between items-center border-t pt-2 sm:pt-3">
 //                       <span className="flex items-center gap-1 text-xs sm:text-sm">
@@ -407,7 +468,11 @@
 //             </Button>
 //             <Button 
 //               type="submit" 
+<<<<<<< HEAD
 //               disabled={!selectedVendor || !remainingBalance || purities.some(p => !p.purity || !p.weight) || vendorsWithBalance.length === 0}
+=======
+//               disabled={!selectedVendor || !remainingBalance || purities.some(p => !p.purity || !p.weight)}
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
 //               className="w-full xs:w-auto"
 //             >
 //               Confirm Receipt
@@ -420,6 +485,10 @@
 // }
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
 "use client"
 
 import { useState, useEffect } from "react"
@@ -452,10 +521,17 @@ export function ReceiveMarketDialog({
   
   const { getVendorRemainingBalance } = useAppStore()
 
+<<<<<<< HEAD
   // FIXED: Filter vendors with ACTUAL remaining balance > 0.001 (to account for floating point)
   const vendorsWithBalance = pendingTransactions.filter(transaction => {
     const balance = getVendorRemainingBalance(transaction.vendor)
     return balance > 0.001 // Small threshold to account for floating point precision
+=======
+  // Filter vendors with remaining balance > 0
+  const vendorsWithBalance = pendingTransactions.filter(transaction => {
+    const balance = getVendorRemainingBalance(transaction.vendor)
+    return balance > 0
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
   })
 
   // Get selected pending transaction
@@ -518,7 +594,11 @@ export function ReceiveMarketDialog({
       date: new Date().toISOString(),
       weight: totalReceivedWeight,
       purity: "Mixed",
+<<<<<<< HEAD
       pureGoldContent: actualPureGold, // This is CRITICAL - store the calculated pure gold
+=======
+      pureGoldContent: actualPureGold,
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
       remainingBalance: parseFloat(remainingBalance) || 0,
       notes,
       // Store complete transaction history
@@ -540,9 +620,12 @@ export function ReceiveMarketDialog({
       newBalance: newRemainingBalance
     }
 
+<<<<<<< HEAD
     console.log(`[RECEIVE] Receiving ${actualPureGold.toFixed(3)}g pure gold from ${selectedVendor}`)
     console.log(`[RECEIVE] Vendor balance before: ${vendorCurrentBalance.toFixed(3)}g, after: ${newRemainingBalance.toFixed(3)}g`)
 
+=======
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
     onReceive(transaction)
     onOpenChange(false)
   }
@@ -620,6 +703,10 @@ export function ReceiveMarketDialog({
             )}
           </div>
 
+<<<<<<< HEAD
+=======
+          {/* Rest of your form remains the same... */}
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
           {/* Vendor Balance Summary */}
           {selectedVendor && (
             <Card className="bg-amber-50 border-amber-200">
@@ -838,4 +925,8 @@ export function ReceiveMarketDialog({
       </DialogContent>
     </Dialog>
   )
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 86d8bca7ff6ca8ef8dee4e5529be1ad77f3df9cf
