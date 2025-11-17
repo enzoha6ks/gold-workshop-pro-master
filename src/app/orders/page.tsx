@@ -1,6 +1,5 @@
 
 
-
 // "use client"
 
 // import { useState } from "react"
@@ -77,6 +76,28 @@
 //   const activeOrders = getActiveOrders().length
 //   const completedOrders = getCompletedOrders().length
 //   const totalRevenue = getTotalRevenue()
+
+//   // Format KWD currency
+//   const formatKWD = (amount: number) => {
+//     return new Intl.NumberFormat('en-KW', {
+//       style: 'currency',
+//       currency: 'KWD',
+//       minimumFractionDigits: 3,
+//       maximumFractionDigits: 3
+//     }).format(amount)
+//   }
+
+//   const formatKWDShort = (amount: number) => {
+//     if (amount >= 1000) {
+//       return `KWD ${(amount / 1000).toFixed(1)}`
+//     }
+//     return new Intl.NumberFormat('en-KW', {
+//       style: 'currency',
+//       currency: 'KWD',
+//       minimumFractionDigits: 0,
+//       maximumFractionDigits: 0
+//     }).format(amount)
+//   }
 
 //   const getStatusColor = (status: Order['status']) => {
 //     switch (status) {
@@ -159,7 +180,7 @@
 //           },
 //           { 
 //             title: "Revenue", 
-//             value: `₹${(totalRevenue / 1000).toFixed(0)}K`, 
+//             value: formatKWDShort(totalRevenue), 
 //             icon: TrendingUp, 
 //             color: "text-green-600",
 //             description: "Total revenue"
@@ -309,7 +330,7 @@
 //                           {order.completedAt ? new Date(order.completedAt).toLocaleDateString() : 'N/A'}
 //                         </span>
 //                         <span className="font-medium text-green-600">
-//                           {order.revenue ? `₹${order.revenue.toLocaleString()}` : 'N/A'}
+//                           {order.revenue ? formatKWD(order.revenue) : 'N/A'}
 //                         </span>
 //                         <div className="flex gap-2">
 //                           <Button 
@@ -435,6 +456,7 @@
 //   )
 // }
 
+
 "use client"
 
 import { useState } from "react"
@@ -443,7 +465,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Package, Clock, CheckCircle, XCircle, TrendingUp, Eye, Edit, Truck } from "lucide-react"
+import { Plus, Package, Clock, CheckCircle, TrendingUp, Eye, Edit, Truck } from "lucide-react"
 import { CreateOrderDialog } from "@/components/orders/create-order-dialog"
 import { OrderDetailsDialog } from "@/components/orders/order-details-dialog"
 import { UpdateOrderDialog } from "@/components/orders/update-order-dialog"
@@ -512,26 +534,13 @@ export default function OrdersPage() {
   const completedOrders = getCompletedOrders().length
   const totalRevenue = getTotalRevenue()
 
-  // Format KWD currency
+  // Format KWD currency - FIXED VERSION
   const formatKWD = (amount: number) => {
-    return new Intl.NumberFormat('en-KW', {
-      style: 'currency',
-      currency: 'KWD',
-      minimumFractionDigits: 3,
-      maximumFractionDigits: 3
-    }).format(amount)
+    return `KWD ${amount.toFixed(3).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
   }
 
   const formatKWDShort = (amount: number) => {
-    if (amount >= 1000) {
-      return `KWD ${(amount / 1000).toFixed(1)}`
-    }
-    return new Intl.NumberFormat('en-KW', {
-      style: 'currency',
-      currency: 'KWD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount)
+    return `KWD ${amount.toFixed(3).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
   }
 
   const getStatusColor = (status: Order['status']) => {
@@ -567,21 +576,22 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6 max-w-full overflow-x-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
       >
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Orders Management</h1>
-          <p className="text-slate-600 mt-1">Track customer orders and production workflow</p>
+        <div className="w-full sm:w-auto">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 break-words">Orders Management</h1>
+          <p className="text-slate-600 mt-1 text-sm sm:text-base">Track customer orders and production workflow</p>
         </div>
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full sm:w-auto mt-2 sm:mt-0">
           <Button 
             className="gap-2 w-full sm:w-auto"
             onClick={() => setShowCreateDialog(true)}
+            size="sm"
           >
             <Plus className="w-4 h-4" />
             New Order
@@ -589,8 +599,8 @@ export default function OrdersPage() {
         </motion.div>
       </motion.div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      {/* Stats - More Compact */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { 
             title: "Total Orders", 
@@ -621,14 +631,16 @@ export default function OrdersPage() {
             description: "Total revenue"
           },
         ].map((stat, index) => (
-          <motion.div key={index} whileHover={{ scale: 1.02 }}>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+          <motion.div key={index} whileHover={{ scale: 1.02 }} className="w-full">
+            <Card className="w-full h-full shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4">
+                <CardTitle className="text-xs font-medium">{stat.title}</CardTitle>
                 <stat.icon className={`w-4 h-4 ${stat.color}`} />
               </CardHeader>
-              <CardContent>
-                <div className={`text-xl md:text-2xl font-bold ${stat.color}`}>{stat.value}</div>
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className={`text-lg font-bold ${stat.color} break-words`}>
+                  {stat.value}
+                </div>
                 <p className="text-xs text-slate-500">{stat.description}</p>
               </CardContent>
             </Card>
@@ -637,73 +649,83 @@ export default function OrdersPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="active">Active ({activeOrders})</TabsTrigger>
-          <TabsTrigger value="completed">Completed ({completedOrders})</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="all">All Orders ({totalOrders})</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+          <TabsTrigger value="active" className="text-xs sm:text-sm py-2 sm:py-3 px-2 sm:px-4 break-words">
+            Active ({activeOrders})
+          </TabsTrigger>
+          <TabsTrigger value="completed" className="text-xs sm:text-sm py-2 sm:py-3 px-2 sm:px-4 break-words">
+            Completed ({completedOrders})
+          </TabsTrigger>
+          <TabsTrigger value="pending" className="text-xs sm:text-sm py-2 sm:py-3 px-2 sm:px-4 break-words">
+            Pending
+          </TabsTrigger>
+          <TabsTrigger value="all" className="text-xs sm:text-sm py-2 sm:py-3 px-2 sm:px-4 break-words">
+            All ({totalOrders})
+          </TabsTrigger>
         </TabsList>
 
         {/* Active Orders Tab */}
-        <TabsContent value="active">
+        <TabsContent value="active" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Active Orders</CardTitle>
+            <CardHeader className="p-4 sm:p-6 pb-3">
+              <CardTitle className="text-lg sm:text-xl">Active Orders</CardTitle>
               <CardDescription>Orders currently in production</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0">
               {filteredOrders.length === 0 ? (
-                <div className="text-center py-12">
-                  <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900">No active orders</h3>
-                  <p className="text-gray-500 mt-1">Create your first order to get started</p>
+                <div className="text-center py-8 sm:py-12">
+                  <Package className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">No active orders</h3>
+                  <p className="text-gray-500 mt-1 text-sm sm:text-base">Create your first order to get started</p>
                   <Button 
                     onClick={() => setShowCreateDialog(true)} 
-                    className="mt-4 gap-2"
+                    className="mt-3 sm:mt-4 gap-2"
+                    size="sm"
                   >
                     <Plus className="w-4 h-4" />
                     Create Order
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {filteredOrders.map((order) => (
                     <motion.div 
                       key={order.id} 
                       whileHover={{ scale: 1.01 }} 
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-slate-50 transition-colors gap-3 sm:gap-4"
                     >
-                      <div className="flex items-center gap-4">
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs shrink-0">
                           {order.id}
                         </Badge>
-                        <div>
-                          <p className="font-medium">{order.customer}</p>
-                          <p className="text-sm text-slate-500">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm sm:text-base truncate">{order.customer}</p>
+                          <p className="text-xs text-slate-500 truncate">
                             {order.items} • {order.goldWeight}g {order.purity}K
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <Badge className={getStatusColor(order.status)}>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                        <Badge className={`${getStatusColor(order.status)} text-xs`}>
                           {getStatusLabel(order.status)}
                         </Badge>
-                        <div className="flex items-center gap-2">
-                          <div className="w-24 bg-slate-200 rounded-full h-2">
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <div className="w-16 sm:w-24 bg-slate-200 rounded-full h-2 flex-1">
                             <div 
                               className={`h-2 rounded-full transition-all duration-500 ${getProgressColor(order.progress)}`}
                               style={{ width: `${order.progress}%` }}
                             />
                           </div>
-                          <span className="text-xs text-slate-500 w-8">{order.progress}%</span>
+                          <span className="text-xs text-slate-500 w-6 sm:w-8 text-right">{order.progress}%</span>
                         </div>
-                        <span className="text-sm text-slate-500">{order.deadline}</span>
-                        <div className="flex gap-2">
+                        <span className="text-xs text-slate-500 hidden sm:block">{order.deadline}</span>
+                        <div className="flex gap-2 w-full sm:w-auto justify-end sm:justify-start">
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={() => handleViewDetails(order)}
+                            className="h-8 w-8 p-0"
                           >
                             <Eye className="w-3 h-3" />
                           </Button>
@@ -711,6 +733,7 @@ export default function OrdersPage() {
                             variant="outline" 
                             size="sm"
                             onClick={() => handleUpdateProgress(order)}
+                            className="h-8 w-8 p-0"
                           >
                             <Edit className="w-3 h-3" />
                           </Button>
@@ -725,53 +748,54 @@ export default function OrdersPage() {
         </TabsContent>
 
         {/* Completed Orders Tab */}
-        <TabsContent value="completed">
+        <TabsContent value="completed" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Completed Orders</CardTitle>
+            <CardHeader className="p-4 sm:p-6 pb-3">
+              <CardTitle className="text-lg sm:text-xl">Completed Orders</CardTitle>
               <CardDescription>Successfully delivered orders</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0">
               {filteredOrders.length === 0 ? (
-                <div className="text-center py-12">
-                  <CheckCircle className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900">No completed orders</h3>
-                  <p className="text-gray-500 mt-1">Completed orders will appear here</p>
+                <div className="text-center py-8 sm:py-12">
+                  <CheckCircle className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">No completed orders</h3>
+                  <p className="text-gray-500 mt-1 text-sm sm:text-base">Completed orders will appear here</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {filteredOrders.map((order) => (
                     <motion.div 
                       key={order.id} 
                       whileHover={{ scale: 1.01 }} 
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-slate-50 transition-colors gap-3 sm:gap-4"
                     >
-                      <div className="flex items-center gap-4">
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs shrink-0">
                           {order.id}
                         </Badge>
-                        <div>
-                          <p className="font-medium">{order.customer}</p>
-                          <p className="text-sm text-slate-500">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm sm:text-base truncate">{order.customer}</p>
+                          <p className="text-xs text-slate-500 truncate">
                             {order.items} • {order.goldWeight}g {order.purity}K
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <Badge className={getStatusColor(order.status)}>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                        <Badge className={`${getStatusColor(order.status)} text-xs`}>
                           {getStatusLabel(order.status)}
                         </Badge>
-                        <span className="text-sm text-slate-500">
+                        <span className="text-xs text-slate-500">
                           {order.completedAt ? new Date(order.completedAt).toLocaleDateString() : 'N/A'}
                         </span>
-                        <span className="font-medium text-green-600">
+                        <span className="font-medium text-green-600 text-sm sm:text-base">
                           {order.revenue ? formatKWD(order.revenue) : 'N/A'}
                         </span>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-full sm:w-auto justify-end sm:justify-start">
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={() => handleViewDetails(order)}
+                            className="h-8 w-8 p-0"
                           >
                             <Eye className="w-3 h-3" />
                           </Button>
@@ -780,6 +804,7 @@ export default function OrdersPage() {
                               variant="outline" 
                               size="sm"
                               onClick={() => deliverOrder(order.id)}
+                              className="h-8 w-8 p-0"
                             >
                               <Truck className="w-3 h-3" />
                             </Button>
@@ -795,63 +820,65 @@ export default function OrdersPage() {
         </TabsContent>
 
         {/* All Orders Tab */}
-        <TabsContent value="all">
+        <TabsContent value="all" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>All Orders</CardTitle>
+            <CardHeader className="p-4 sm:p-6 pb-3">
+              <CardTitle className="text-lg sm:text-xl">All Orders</CardTitle>
               <CardDescription>Complete order history</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0">
               {orders.length === 0 ? (
-                <div className="text-center py-12">
-                  <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900">No orders yet</h3>
-                  <p className="text-gray-500 mt-1">Create your first order to get started</p>
+                <div className="text-center py-8 sm:py-12">
+                  <Package className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">No orders yet</h3>
+                  <p className="text-gray-500 mt-1 text-sm sm:text-base">Create your first order to get started</p>
                   <Button 
                     onClick={() => setShowCreateDialog(true)} 
-                    className="mt-4 gap-2"
+                    className="mt-3 sm:mt-4 gap-2"
+                    size="sm"
                   >
                     <Plus className="w-4 h-4" />
                     Create Order
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {orders.map((order) => (
                     <motion.div 
                       key={order.id} 
                       whileHover={{ scale: 1.01 }} 
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-slate-50 transition-colors gap-3 sm:gap-4"
                     >
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
                         <Badge 
                           variant="outline" 
-                          className={
+                          className={`text-xs shrink-0 ${
                             order.status === 'completed' || order.status === 'delivered' 
                               ? "bg-green-50 text-green-700 border-green-200"
                               : "bg-blue-50 text-blue-700 border-blue-200"
-                          }
+                          }`}
                         >
                           {order.id}
                         </Badge>
-                        <div>
-                          <p className="font-medium">{order.customer}</p>
-                          <p className="text-sm text-slate-500">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm sm:text-base truncate">{order.customer}</p>
+                          <p className="text-xs text-slate-500 truncate">
                             {order.items} • {order.goldWeight}g {order.purity}K
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <Badge className={getStatusColor(order.status)}>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                        <Badge className={`${getStatusColor(order.status)} text-xs`}>
                           {getStatusLabel(order.status)}
                         </Badge>
-                        <span className="text-sm text-slate-500">
+                        <span className="text-xs text-slate-500">
                           {new Date(order.createdAt).toLocaleDateString()}
                         </span>
                         <Button 
                           variant="outline" 
                           size="sm"
                           onClick={() => handleViewDetails(order)}
+                          className="h-8 px-2 sm:px-3 text-xs"
                         >
                           <Eye className="w-3 h-3 mr-1" />
                           Details
@@ -890,4 +917,3 @@ export default function OrdersPage() {
     </div>
   )
 }
-

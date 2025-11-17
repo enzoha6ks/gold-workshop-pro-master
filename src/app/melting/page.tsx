@@ -174,6 +174,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+<<<<<<< HEAD
 import { Plus, Flame, TrendingDown, Calculator, History, Eye } from "lucide-react"
 
 // Types
@@ -313,6 +314,107 @@ export default function MeltingPage() {
       planned: { bg: "bg-gray-100 text-gray-800", label: "Planned" }
     }
     return variants[status]
+=======
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Plus, Flame, TrendingDown, Calculator, History, Trash2 } from "lucide-react"
+import { useMeltingStore } from "@/lib/store"
+
+export default function MeltingPage() {
+  const [activeTab, setActiveTab] = useState("batches")
+  const { 
+    meltingBatches, 
+    addMeltingBatch, 
+    deleteMeltingBatch,
+    getTotalMeltingLoss,
+    getAverageEfficiency 
+  } = useMeltingStore()
+
+  // New batch form state
+  const [newBatch, setNewBatch] = useState({
+    inputWeight: "",
+    inputPurity: "917",
+    outputWeight: "",
+    outputPurity: "995"
+  })
+  const [showNewBatchForm, setShowNewBatchForm] = useState(false)
+
+  // Calculator state
+  const [calculatorInput, setCalculatorInput] = useState({
+    weight: "",
+    fromPurity: "917",
+    toPurity: "995"
+  })
+  const [calculatorResult, setCalculatorResult] = useState<{
+    outputWeight: number
+    pureGold: number
+    loss: number
+  } | null>(null)
+
+  // Calculate stats from store
+  const totalBatches = meltingBatches.length
+  const totalLoss = getTotalMeltingLoss()
+  const avgEfficiency = getAverageEfficiency()
+  const thisMonthBatches = meltingBatches.filter(batch => 
+    new Date(batch.date).getMonth() === new Date().getMonth()
+  ).length
+
+  // Handle new batch submission
+  const handleAddBatch = () => {
+    if (!newBatch.inputWeight || !newBatch.outputWeight) return
+
+    const inputWeight = parseFloat(newBatch.inputWeight)
+    const outputWeight = parseFloat(newBatch.outputWeight)
+    const inputPurity = parseInt(newBatch.inputPurity)
+    const outputPurity = parseInt(newBatch.outputPurity)
+    const loss = inputWeight - outputWeight
+    const efficiency = (outputWeight / inputWeight) * 100
+
+    addMeltingBatch({
+      inputWeight,
+      inputPurity,
+      outputWeight,
+      outputPurity,
+      loss,
+      efficiency: parseFloat(efficiency.toFixed(1)),
+      date: new Date().toISOString().split('T')[0],
+      status: "completed"
+    })
+
+    setNewBatch({
+      inputWeight: "",
+      inputPurity: "917",
+      outputWeight: "",
+      outputPurity: "995"
+    })
+    setShowNewBatchForm(false)
+  }
+
+  // Handle calculator calculation
+  const calculateMelting = () => {
+    const weight = parseFloat(calculatorInput.weight)
+    const fromPurity = parseInt(calculatorInput.fromPurity)
+    const toPurity = parseInt(calculatorInput.toPurity)
+
+    if (!weight || weight <= 0) return
+
+    const pureGold = (weight * fromPurity) / 1000
+    const outputWeight = (pureGold * 1000) / toPurity
+    const loss = weight - outputWeight
+
+    setCalculatorResult({
+      outputWeight: parseFloat(outputWeight.toFixed(3)),
+      pureGold: parseFloat(pureGold.toFixed(3)),
+      loss: parseFloat(loss.toFixed(3))
+    })
+  }
+
+  const getEfficiencyColor = (efficiency: number) => {
+    if (efficiency >= 99) return "bg-green-100 text-green-800"
+    if (efficiency >= 97) return "bg-amber-100 text-amber-800"
+    return "bg-rose-100 text-rose-800"
+>>>>>>> afbfbfd (update_responsive_fixes)
   }
 
   return (
@@ -328,7 +430,14 @@ export default function MeltingPage() {
           <p className="text-slate-600 mt-1">Track gold melting batches and purity conversions</p>
         </div>
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+<<<<<<< HEAD
           <Button className="gap-2 w-full sm:w-auto" onClick={handleNewBatch}>
+=======
+          <Button 
+            className="gap-2 w-full sm:w-auto"
+            onClick={() => setShowNewBatchForm(true)}
+          >
+>>>>>>> afbfbfd (update_responsive_fixes)
             <Plus className="w-4 h-4" />
             New Melting Batch
           </Button>
@@ -338,6 +447,7 @@ export default function MeltingPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {[
+<<<<<<< HEAD
           { 
             title: "Total Batches", 
             value: totalBatches.toString(), 
@@ -366,6 +476,12 @@ export default function MeltingPage() {
             color: "text-blue-600",
             description: "Current month"
           },
+=======
+          { title: "Total Batches", value: totalBatches.toString(), icon: Flame, color: "text-orange-600" },
+          { title: "Melting Loss", value: `${totalLoss.toFixed(1)}g`, icon: TrendingDown, color: "text-rose-600" },
+          { title: "Avg Efficiency", value: `${avgEfficiency.toFixed(1)}%`, icon: Calculator, color: "text-emerald-600" },
+          { title: "This Month", value: thisMonthBatches.toString(), icon: History, color: "text-blue-600" },
+>>>>>>> afbfbfd (update_responsive_fixes)
         ].map((stat, index) => (
           <motion.div key={index} whileHover={{ scale: 1.02 }}>
             <Card>
@@ -400,6 +516,7 @@ export default function MeltingPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+<<<<<<< HEAD
               {batches.length === 0 ? (
                 <div className="text-center py-12">
                   <Flame className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -408,10 +525,24 @@ export default function MeltingPage() {
                   <Button onClick={handleNewBatch} className="mt-4 gap-2">
                     <Plus className="w-4 h-4" />
                     Create First Batch
+=======
+              {meltingBatches.length === 0 ? (
+                <div className="text-center py-12">
+                  <Flame className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900">No melting batches</h3>
+                  <p className="text-gray-500 mt-1">Create your first melting batch to get started</p>
+                  <Button 
+                    onClick={() => setShowNewBatchForm(true)} 
+                    className="mt-4 gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    New Batch
+>>>>>>> afbfbfd (update_responsive_fixes)
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
+<<<<<<< HEAD
                   {batches.map((batch, index) => {
                     const statusBadge = getStatusBadge(batch.status)
                     return (
@@ -454,6 +585,36 @@ export default function MeltingPage() {
                       </motion.div>
                     )
                   })}
+=======
+                  {meltingBatches.map((batch) => (
+                    <motion.div key={batch.id} whileHover={{ scale: 1.01 }} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <Badge variant="outline" className="bg-orange-50 text-orange-700">
+                          {batch.id}
+                        </Badge>
+                        <div>
+                          <p className="font-medium">
+                            Input: {batch.inputWeight}g {batch.inputPurity} → Output: {batch.outputWeight}g {batch.outputPurity}
+                          </p>
+                          <p className="text-sm text-slate-500">{batch.date}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Badge className={getEfficiencyColor(batch.efficiency)}>
+                          {batch.efficiency}% eff.
+                        </Badge>
+                        <span className="text-sm text-rose-600">Loss: {batch.loss}g</span>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => deleteMeltingBatch(batch.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ))}
+>>>>>>> afbfbfd (update_responsive_fixes)
                 </div>
               )}
             </CardContent>
@@ -468,6 +629,7 @@ export default function MeltingPage() {
               <CardDescription>Performance metrics and trends by purity conversion</CardDescription>
             </CardHeader>
             <CardContent>
+<<<<<<< HEAD
               {efficiencyStats.filter(stat => stat.totalBatches > 0).length === 0 ? (
                 <div className="text-center py-12">
                   <Calculator className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -497,6 +659,38 @@ export default function MeltingPage() {
                       </motion.div>
                     ))
                   }
+=======
+              {meltingBatches.length === 0 ? (
+                <div className="text-center py-12">
+                  <Calculator className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900">No efficiency data</h3>
+                  <p className="text-gray-500 mt-1">Create melting batches to see efficiency metrics</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {Array.from(new Set(meltingBatches.map(b => `${b.inputPurity} to ${b.outputPurity}`))).map((purity, index) => {
+                    const batchesForPurity = meltingBatches.filter(b => 
+                      `${b.inputPurity} to ${b.outputPurity}` === purity
+                    )
+                    const avgEff = batchesForPurity.reduce((sum, b) => sum + b.efficiency, 0) / batchesForPurity.length
+                    const totalLoss = batchesForPurity.reduce((sum, b) => sum + b.loss, 0)
+
+                    return (
+                      <motion.div key={index} whileHover={{ scale: 1.01 }} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <p className="font-medium">{purity}</p>
+                          <p className="text-sm text-slate-500">{batchesForPurity.length} batches</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Badge variant="outline" className="bg-green-50 text-green-700">
+                            {avgEff.toFixed(1)}%
+                          </Badge>
+                          <span className="text-sm text-rose-600">{totalLoss.toFixed(1)}g loss</span>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
+>>>>>>> afbfbfd (update_responsive_fixes)
                 </div>
               )}
             </CardContent>
@@ -508,6 +702,7 @@ export default function MeltingPage() {
           <Card>
             <CardHeader>
               <CardTitle>Melting Calculator</CardTitle>
+<<<<<<< HEAD
               <CardDescription>Calculate expected output and efficiency</CardDescription>
             </CardHeader>
             <CardContent>
@@ -518,11 +713,157 @@ export default function MeltingPage() {
                 <p className="text-xs text-slate-500">
                   Features: Input purity conversion, expected output calculation, efficiency estimation.
                 </p>
+=======
+              <CardDescription>Calculate expected output and loss</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="weight">Input Weight (g)</Label>
+                    <Input
+                      id="weight"
+                      type="number"
+                      placeholder="Enter weight"
+                      value={calculatorInput.weight}
+                      onChange={(e) => setCalculatorInput({...calculatorInput, weight: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="fromPurity">From Purity</Label>
+                    <Select value={calculatorInput.fromPurity} onValueChange={(value) => setCalculatorInput({...calculatorInput, fromPurity: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="999">999</SelectItem>
+                        <SelectItem value="995">995</SelectItem>
+                        <SelectItem value="917">917</SelectItem>
+                        <SelectItem value="875">875</SelectItem>
+                        <SelectItem value="750">750</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="toPurity">To Purity</Label>
+                    <Select value={calculatorInput.toPurity} onValueChange={(value) => setCalculatorInput({...calculatorInput, toPurity: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="999">999</SelectItem>
+                        <SelectItem value="995">995</SelectItem>
+                        <SelectItem value="917">917</SelectItem>
+                        <SelectItem value="875">875</SelectItem>
+                        <SelectItem value="750">750</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <Button onClick={calculateMelting} className="w-full">
+                  Calculate
+                </Button>
+
+                {calculatorResult && (
+                  <div className="p-4 border rounded-lg bg-slate-50">
+                    <h4 className="font-semibold mb-2">Calculation Results:</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span>Output Weight:</span>
+                        <span className="font-medium">{calculatorResult.outputWeight}g</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Pure Gold Content:</span>
+                        <span className="font-medium">{calculatorResult.pureGold}g</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Expected Loss:</span>
+                        <span className="font-medium text-rose-600">{calculatorResult.loss}g</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+>>>>>>> afbfbfd (update_responsive_fixes)
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* New Batch Dialog */}
+      {showNewBatchForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>New Melting Batch</CardTitle>
+              <CardDescription>Add a completed melting batch</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="inputWeight">Input Weight (g)</Label>
+                  <Input
+                    id="inputWeight"
+                    type="number"
+                    placeholder="Weight"
+                    value={newBatch.inputWeight}
+                    onChange={(e) => setNewBatch({...newBatch, inputWeight: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="inputPurity">Input Purity</Label>
+                  <Select value={newBatch.inputPurity} onValueChange={(value) => setNewBatch({...newBatch, inputPurity: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="999">999</SelectItem>
+                      <SelectItem value="995">995</SelectItem>
+                      <SelectItem value="917">917</SelectItem>
+                      <SelectItem value="875">875</SelectItem>
+                      <SelectItem value="750">750</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="outputWeight">Output Weight (g)</Label>
+                  <Input
+                    id="outputWeight"
+                    type="number"
+                    placeholder="Weight"
+                    value={newBatch.outputWeight}
+                    onChange={(e) => setNewBatch({...newBatch, outputWeight: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="outputPurity">Output Purity</Label>
+                  <Select value={newBatch.outputPurity} onValueChange={(value) => setNewBatch({...newBatch, outputPurity: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="999">999</SelectItem>
+                      <SelectItem value="995">995</SelectItem>
+                      <SelectItem value="917">917</SelectItem>
+                      <SelectItem value="875">875</SelectItem>
+                      <SelectItem value="750">750</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleAddBatch} className="flex-1">
+                  Add Batch
+                </Button>
+                <Button variant="outline" onClick={() => setShowNewBatchForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

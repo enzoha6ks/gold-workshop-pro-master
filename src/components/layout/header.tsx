@@ -9,7 +9,7 @@ export function Header() {
       
       {/* Page Title - You can make this dynamic later */}
       <div className="flex-1">
-        <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+        <h1 className="text-xl font-semibold text-gray-900">👩‍💻</h1>
       </div>
 
       {/* Right side actions */}

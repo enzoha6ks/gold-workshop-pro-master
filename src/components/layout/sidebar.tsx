@@ -21,10 +21,10 @@ import { Flame } from "lucide-react" // Add this import
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home, badge: null },
-  { name: "Gold Safe", href: "/gold-safe", icon: Database, badge: "00 kg" },
-  { name: "Workers", href: "/workers", icon: Users, badge: "14" },
+  { name: "Gold Safe", href: "/gold-safe", icon: Database, badge: null },
+  { name: "Workers", href: "/workers", icon: Users, badge: null },
   { name: "Market", href: "/market", icon: TrendingUp, badge: null }, // Use TrendingUp for Market  
-  { name: "Orders", href: "/orders", icon: Package, badge: "23" },  
+  { name: "Orders", href: "/orders", icon: Package, badge: null },  
   { name: "Melting", href: "/melting", icon: Flame, badge: null },
   { name: "Reports", href: "/reports", icon: BarChart3, badge: "New" },
   { name: "Settings", href: "/settings", icon: Settings, badge: null },
@@ -88,7 +88,7 @@ export function Sidebar() {
       <Separator className="bg-slate-800" />
 
       {/* Quick Stats - Professional */}
-      <div className="p-4 space-y-3 bg-slate-900/30 m-3 rounded-lg border border-slate-800">
+      {/* <div className="p-4 space-y-3 bg-slate-900/30 m-3 rounded-lg border border-slate-800">
         <div className="text-xs text-slate-400 uppercase tracking-wider font-medium">
           Today's Summary
         </div>
@@ -106,7 +106,7 @@ export function Sidebar() {
             <span className="text-blue-400 font-medium">98.2%</span>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <Separator className="bg-slate-800" />
 
@@ -121,11 +121,13 @@ export function Sidebar() {
             <p className="text-xs text-slate-400 truncate"></p>
           </div>
           <Button
+         
             variant="ghost"
             size="icon"
             className="w-8 h-8 text-slate-400 hover:text-white hover:bg-slate-800/50 border border-slate-800"
           >
-            <Settings className="w-4 h-4" />
+            <Settings  className="w-4 h-4" / >
+            
           </Button>
         </div>
       </div>

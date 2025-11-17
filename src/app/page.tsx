@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { TrendingUp, TrendingDown, Package, Scale, AlertTriangle, Users, BarChart3, Building } from "lucide-react"
+import { Package, AlertTriangle, Users, Building } from "lucide-react"
 import { useAppStore } from "@/lib/store"
 
 export default function DashboardPage() {
@@ -17,7 +17,9 @@ export default function DashboardPage() {
     getTotalExtraLoss,
     getMonthlyExtraLoss,
     getVendors,
-    getVendorRemainingBalance
+    getVendorRemainingBalance,
+    getTotalLoss,
+    getMonthlyTotalLoss
   } = useAppStore()
 
   useEffect(() => {
@@ -30,8 +32,10 @@ export default function DashboardPage() {
 
   // Get all data from Zustand store
   const stock = calculateStock()
-  const totalLoss = getTotalExtraLoss()
-  const monthlyLoss = getMonthlyExtraLoss()
+  const totalExtraLoss = getTotalExtraLoss()
+  const monthlyExtraLoss = getMonthlyExtraLoss()
+  const totalAllLoss = getTotalLoss() // This includes melting + market + extra loss
+  const monthlyAllLoss = getMonthlyTotalLoss() // Monthly total loss
   const vendors = getVendors()
 
   // Calculate total remaining market balance from all vendors
@@ -51,7 +55,7 @@ export default function DashboardPage() {
   // Calculate recent transactions (last 5)
   const recentTransactions = transactions.slice(0, 5)
 
-  // Stats array - UPDATED
+  // Stats array - UPDATED with total loss
   const stats = [
     { 
       title: "Total Stock", 
@@ -68,9 +72,9 @@ export default function DashboardPage() {
       color: "text-green-600"
     },
     { 
-      title: "Loss", 
-      value: `${totalLoss.toFixed(1)}g`, 
-      subtitle: `${monthlyLoss.toFixed(1)}g this month`,
+      title: "Total Loss", 
+      value: `${totalAllLoss.toFixed(1)}g`, 
+      subtitle: `${monthlyAllLoss.toFixed(1)}g this month`,
       icon: AlertTriangle, 
       color: "text-rose-600"
     },
@@ -164,7 +168,7 @@ export default function DashboardPage() {
             <CardContent className="p-4 sm:p-6 pt-0">
               {recentTransactions.length === 0 ? (
                 <div className="text-center py-6 sm:py-8 text-slate-500">
-                  <Scale className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-3 text-slate-300" />
+                  <Package className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 sm:mb-3 text-slate-300" />
                   <p className="text-sm">No transactions yet</p>
                 </div>
               ) : (
@@ -203,34 +207,40 @@ export default function DashboardPage() {
         transition={{ delay: 0.4 }}
         className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
       >
-        {/* Loss Card */}
+        {/* Loss Card - UPDATED to show total loss breakdown */}
         <Card className="border-rose-200">
           <CardHeader className="pb-3 p-4 sm:p-6">
             <CardTitle className="flex items-center gap-2 text-rose-700 text-base sm:text-lg">
               <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
-              Loss Details
+              Total Loss Breakdown
             </CardTitle>
-            <CardDescription className="text-sm">Manual loss entries from workers</CardDescription>
+            <CardDescription className="text-sm">Combined loss from all sources</CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
             <div className="space-y-3 sm:space-y-4">
               <div className="flex justify-between items-center p-3 bg-rose-50 rounded-lg">
-                <span className="text-sm font-medium text-rose-700">Total Loss</span>
+                <span className="text-sm font-medium text-rose-700">Total All Loss</span>
                 <span className="font-mono font-bold text-rose-700 text-sm sm:text-base">
-                  {totalLoss.toFixed(2)}g
+                  {totalAllLoss.toFixed(2)}g
                 </span>
               </div>
               <div className="flex justify-between items-center p-3 bg-rose-50 rounded-lg">
-                <span className="text-sm font-medium text-rose-700">This Month</span>
+                <span className="text-sm font-medium text-rose-700">This Month Total</span>
                 <span className="font-mono font-bold text-rose-700 text-sm sm:text-base">
-                  {monthlyLoss.toFixed(2)}g
+                  {monthlyAllLoss.toFixed(2)}g
+                </span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                <span className="text-sm font-medium text-orange-700">Worker Loss Only</span>
+                <span className="font-mono font-bold text-orange-700 text-sm sm:text-base">
+                  {totalExtraLoss.toFixed(2)}g
                 </span>
               </div>
               
               {/* Recent Losses */}
               {extraLosses.length > 0 && (
                 <div className="mt-3 sm:mt-4">
-                  <h4 className="text-sm font-medium text-rose-700 mb-2">Recent Losses</h4>
+                  <h4 className="text-sm font-medium text-rose-700 mb-2">Recent Worker Losses</h4>
                   <div className="space-y-2 max-h-24 sm:max-h-32 overflow-y-auto">
                     {extraLosses.slice(0, 5).map((loss) => (
                       <div key={loss.id} className="flex justify-between items-center text-xs p-2 bg-rose-50 rounded">
@@ -300,9 +310,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-
-
-
-
-
-// test update check 
