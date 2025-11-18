@@ -1,171 +1,3 @@
-// "use client"
-
-// import { useState } from "react"
-// import { motion } from "framer-motion"
-// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Badge } from "@/components/ui/badge"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { Plus, Flame, TrendingDown, Calculator, History } from "lucide-react"
-
-// export default function MeltingPage() {
-//   const [activeTab, setActiveTab] = useState("batches")
-
-//   return (
-//     <div className="p-4 md:p-6 space-y-6">
-//       {/* Header */}
-//       <motion.div
-//         initial={{ opacity: 0, y: -20 }}
-//         animate={{ opacity: 1, y: 0 }}
-//         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-//       >
-//         <div>
-//           <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Melting Process</h1>
-//           <p className="text-slate-600 mt-1">Track gold melting batches and purity conversions</p>
-//         </div>
-//         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-//           <Button className="gap-2 w-full sm:w-auto">
-//             <Plus className="w-4 h-4" />
-//             New Melting Batch
-//           </Button>
-//         </motion.div>
-//       </motion.div>
-
-//       {/* Stats */}
-//       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-//         {[
-//           { title: "Total Batches", value: "24", icon: Flame, color: "text-orange-600" },
-//           { title: "Melting Loss", value: "8.5g", icon: TrendingDown, color: "text-rose-600" },
-//           { title: "Avg Efficiency", value: "99.2%", icon: Calculator, color: "text-emerald-600" },
-//           { title: "This Month", value: "3", icon: History, color: "text-blue-600" },
-//         ].map((stat, index) => (
-//           <motion.div key={index} whileHover={{ scale: 1.02 }}>
-//             <Card>
-//               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-//                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-//                 <stat.icon className={`w-4 h-4 ${stat.color}`} />
-//               </CardHeader>
-//               <CardContent>
-//                 <div className={`text-xl md:text-2xl font-bold ${stat.color}`}>{stat.value}</div>
-//                 <p className="text-xs text-slate-500">Pure gold terms</p>
-//               </CardContent>
-//             </Card>
-//           </motion.div>
-//         ))}
-//       </div>
-
-//       {/* Tabs */}
-//       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-//         <TabsList className="grid w-full grid-cols-3">
-//           <TabsTrigger value="batches">Batches</TabsTrigger>
-//           <TabsTrigger value="efficiency">Efficiency</TabsTrigger>
-//           <TabsTrigger value="calculator">Calculator</TabsTrigger>
-//         </TabsList>
-
-//         {/* Batches Tab */}
-//         <TabsContent value="batches">
-//           <Card>
-//             <CardHeader>
-//               <CardTitle>Melting Batches</CardTitle>
-//               <CardDescription>Recent gold melting operations</CardDescription>
-//             </CardHeader>
-//             <CardContent>
-//               <div className="space-y-4">
-//                 {[
-//                   { 
-//                     id: "MEL-001", 
-//                     input: "500g 917", 
-//                     output: "495g 995", 
-//                     loss: "5g", 
-//                     efficiency: "99.0%",
-//                     date: "2024-01-15",
-//                     status: "completed"
-//                   },
-//                   { 
-//                     id: "MEL-002", 
-//                     input: "300g 875", 
-//                     output: "298g 995", 
-//                     loss: "2g", 
-//                     efficiency: "99.3%",
-//                     date: "2024-01-18", 
-//                     status: "completed"
-//                   },
-//                   { 
-//                     id: "MEL-003", 
-//                     input: "200g 750", 
-//                     output: "195g 995", 
-//                     loss: "5g", 
-//                     efficiency: "97.5%",
-//                     date: "2024-01-20",
-//                     status: "completed"
-//                   },
-//                 ].map((batch, index) => (
-//                   <motion.div key={index} whileHover={{ scale: 1.01 }} className="flex items-center justify-between p-4 border rounded-lg">
-//                     <div className="flex items-center gap-4">
-//                       <Badge variant="outline" className="bg-orange-50 text-orange-700">
-//                         {batch.id}
-//                       </Badge>
-//                       <div>
-//                         <p className="font-medium">Input: {batch.input} → Output: {batch.output}</p>
-//                         <p className="text-sm text-slate-500">{batch.date}</p>
-//                       </div>
-//                     </div>
-//                     <div className="flex items-center gap-4">
-//                       <Badge variant={batch.efficiency >= "99%" ? "default" : "destructive"}>
-//                         {batch.efficiency} eff.
-//                       </Badge>
-//                       <span className="text-sm text-rose-600">Loss: {batch.loss}</span>
-//                       <Button variant="outline" size="sm">Details</Button>
-//                     </div>
-//                   </motion.div>
-//                 ))}
-//               </div>
-//             </CardContent>
-//           </Card>
-//         </TabsContent>
-
-//         {/* Efficiency Tab */}
-//         <TabsContent value="efficiency">
-//           <Card>
-//             <CardHeader>
-//               <CardTitle>Melting Efficiency</CardTitle>
-//               <CardDescription>Performance metrics and trends</CardDescription>
-//             </CardHeader>
-//             <CardContent>
-//               <div className="space-y-4">
-//                 {[
-//                   { purity: "995 to 995", avgEfficiency: "99.8%", totalBatches: 12, totalLoss: "2.5g" },
-//                   { purity: "917 to 995", avgEfficiency: "99.2%", totalBatches: 8, totalLoss: "4.8g" },
-//                   { purity: "875 to 995", avgEfficiency: "98.7%", totalBatches: 3, totalLoss: "1.2g" },
-//                   { purity: "750 to 995", avgEfficiency: "97.5%", totalBatches: 1, totalLoss: "5.0g" },
-//                 ].map((item, index) => (
-//                   <motion.div key={index} whileHover={{ scale: 1.01 }} className="flex items-center justify-between p-4 border rounded-lg">
-//                     <div>
-//                       <p className="font-medium">{item.purity}</p>
-//                       <p className="text-sm text-slate-500">{item.totalBatches} batches</p>
-//                     </div>
-//                     <div className="flex items-center gap-4">
-//                       <Badge variant="outline" className="bg-green-50 text-green-700">
-//                         {item.avgEfficiency}
-//                       </Badge>
-//                       <span className="text-sm text-rose-600">{item.totalLoss} loss</span>
-//                     </div>
-//                   </motion.div>
-//                 ))}
-//               </div>
-//             </CardContent>
-//           </Card>
-//         </TabsContent>
-//       </Tabs>
-//     </div>
-//   )
-// }
-
-
-
-
-
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -174,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-<<<<<<< HEAD
-import { Plus, Flame, TrendingDown, Calculator, History, Eye } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Plus, Flame, TrendingDown, Calculator, History, Trash2, Eye } from "lucide-react"
 
 // Types
 interface MeltingBatch {
@@ -200,144 +34,11 @@ interface EfficiencyStats {
 
 export default function MeltingPage() {
   const [activeTab, setActiveTab] = useState("batches")
-  const [batches, setBatches] = useState<MeltingBatch[]>([
-    { 
-      id: "MEL-001", 
-      inputWeight: 500,
-      inputPurity: 917,
-      outputWeight: 495,
-      outputPurity: 995,
-      loss: 5,
-      efficiency: 99.0,
-      date: "2024-01-15",
-      status: "completed"
-    },
-    { 
-      id: "MEL-002", 
-      inputWeight: 300,
-      inputPurity: 875,
-      outputWeight: 298,
-      outputPurity: 995,
-      loss: 2,
-      efficiency: 99.3,
-      date: "2024-01-18", 
-      status: "completed"
-    },
-    { 
-      id: "MEL-003", 
-      inputWeight: 200,
-      inputPurity: 750,
-      outputWeight: 195,
-      outputPurity: 995,
-      loss: 5,
-      efficiency: 97.5,
-      date: "2024-01-20",
-      status: "completed"
-    },
-  ])
-
-  // Calculate statistics
-  const totalBatches = batches.length
-  const totalLoss = batches.reduce((sum, batch) => sum + batch.loss, 0)
-  const avgEfficiency = batches.length > 0 
-    ? batches.reduce((sum, batch) => sum + batch.efficiency, 0) / batches.length 
-    : 0
-  const thisMonthBatches = batches.filter(batch => {
-    const batchDate = new Date(batch.date)
-    const now = new Date()
-    return batchDate.getMonth() === now.getMonth() && batchDate.getFullYear() === now.getFullYear()
-  }).length
-
-  // Calculate efficiency statistics by purity conversion
-  const efficiencyStats: EfficiencyStats[] = [
-    {
-      purity: "995 to 995",
-      avgEfficiency: 99.8,
-      totalBatches: batches.filter(b => b.inputPurity === 995 && b.outputPurity === 995).length,
-      totalLoss: batches.filter(b => b.inputPurity === 995 && b.outputPurity === 995)
-        .reduce((sum, b) => sum + b.loss, 0)
-    },
-    {
-      purity: "917 to 995",
-      avgEfficiency: 99.2,
-      totalBatches: batches.filter(b => b.inputPurity === 917 && b.outputPurity === 995).length,
-      totalLoss: batches.filter(b => b.inputPurity === 917 && b.outputPurity === 995)
-        .reduce((sum, b) => sum + b.loss, 0)
-    },
-    {
-      purity: "875 to 995",
-      avgEfficiency: 98.7,
-      totalBatches: batches.filter(b => b.inputPurity === 875 && b.outputPurity === 995).length,
-      totalLoss: batches.filter(b => b.inputPurity === 875 && b.outputPurity === 995)
-        .reduce((sum, b) => sum + b.loss, 0)
-    },
-    {
-      purity: "750 to 995",
-      avgEfficiency: 97.5,
-      totalBatches: batches.filter(b => b.inputPurity === 750 && b.outputPurity === 995).length,
-      totalLoss: batches.filter(b => b.inputPurity === 750 && b.outputPurity === 995)
-        .reduce((sum, b) => sum + b.loss, 0)
-    },
-  ]
-
-  const handleNewBatch = () => {
-    const newBatch: MeltingBatch = {
-      id: `MEL-${String(batches.length + 1).padStart(3, '0')}`,
-      inputWeight: 0,
-      inputPurity: 917,
-      outputWeight: 0,
-      outputPurity: 995,
-      loss: 0,
-      efficiency: 0,
-      date: new Date().toISOString().split('T')[0],
-      status: 'planned'
-    }
-    setBatches([newBatch, ...batches])
-  }
-
-  const handleViewDetails = (batchId: string) => {
-    // In a real app, this would open a detail view or dialog
-    console.log("Viewing details for batch:", batchId)
-    // You can implement a dialog or navigate to detail page
-  }
-
-  const getEfficiencyColor = (efficiency: number) => {
-    if (efficiency >= 99) return "bg-green-50 text-green-700 border-green-200"
-    if (efficiency >= 98) return "bg-amber-50 text-amber-700 border-amber-200"
-    return "bg-rose-50 text-rose-700 border-rose-200"
-  }
-
-  const getStatusBadge = (status: MeltingBatch['status']) => {
-    const variants = {
-      completed: { bg: "bg-green-100 text-green-800", label: "Completed" },
-      'in-progress': { bg: "bg-blue-100 text-blue-800", label: "In Progress" },
-      planned: { bg: "bg-gray-100 text-gray-800", label: "Planned" }
-    }
-    return variants[status]
-=======
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Flame, TrendingDown, Calculator, History, Trash2 } from "lucide-react"
-import { useMeltingStore } from "@/lib/store"
-
-export default function MeltingPage() {
-  const [activeTab, setActiveTab] = useState("batches")
   const [showNewBatchForm, setShowNewBatchForm] = useState(false)
   const [isClient, setIsClient] = useState(false)
   
-  const { 
-    meltingBatches, 
-    addMeltingBatch, 
-    deleteMeltingBatch,
-    getTotalMeltingLoss,
-    getTotalMeltingGain,
-    getAverageEfficiency 
-  } = useMeltingStore()
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  // Local state for batches - starting empty
+  const [batches, setBatches] = useState<MeltingBatch[]>([])
 
   // New batch form state
   const [newBatch, setNewBatch] = useState({
@@ -360,14 +61,48 @@ export default function MeltingPage() {
     loss: number
   } | null>(null)
 
-  // Calculate stats using store functions - use 0 during SSR to avoid hydration mismatch
-  const totalBatches = isClient ? meltingBatches.length : 0
-  const totalLoss = isClient ? getTotalMeltingLoss() : 0
-  const totalGain = isClient ? getTotalMeltingGain() : 0
-  const avgEfficiency = isClient ? getAverageEfficiency() : 0
-  const thisMonthBatches = isClient ? meltingBatches.filter(batch => 
-    new Date(batch.date).getMonth() === new Date().getMonth()
-  ).length : 0
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Calculate statistics
+  const totalBatches = isClient ? batches.length : 0
+  const totalLoss = isClient ? batches.reduce((sum, batch) => sum + batch.loss, 0) : 0
+  const avgEfficiency = isClient && batches.length > 0 
+    ? batches.reduce((sum, batch) => sum + batch.efficiency, 0) / batches.length 
+    : 0
+  const thisMonthBatches = isClient ? batches.filter(batch => {
+    const batchDate = new Date(batch.date)
+    const now = new Date()
+    return batchDate.getMonth() === now.getMonth() && batchDate.getFullYear() === now.getFullYear()
+  }).length : 0
+
+  // Calculate efficiency statistics by purity conversion
+  const getEfficiencyStats = (): EfficiencyStats[] => {
+    if (batches.length === 0) return []
+    
+    const purityGroups = batches.reduce((groups, batch) => {
+      const key = `${batch.inputPurity} to ${batch.outputPurity}`
+      if (!groups[key]) {
+        groups[key] = {
+          batches: [],
+          totalLoss: 0
+        }
+      }
+      groups[key].batches.push(batch)
+      groups[key].totalLoss += batch.loss
+      return groups
+    }, {} as Record<string, { batches: MeltingBatch[], totalLoss: number }>)
+
+    return Object.entries(purityGroups).map(([purity, data]) => ({
+      purity,
+      avgEfficiency: data.batches.reduce((sum, b) => sum + b.efficiency, 0) / data.batches.length,
+      totalBatches: data.batches.length,
+      totalLoss: data.totalLoss
+    }))
+  }
+
+  const efficiencyStats = getEfficiencyStats()
 
   // Handle new batch submission
   const handleAddBatch = () => {
@@ -377,21 +112,29 @@ export default function MeltingPage() {
     const outputWeight = parseFloat(newBatch.outputWeight)
     const inputPurity = parseInt(newBatch.inputPurity)
     const outputPurity = parseInt(newBatch.outputPurity)
-    const weightChange = outputWeight - inputWeight // Can be positive (gain) or negative (loss)
+    
+    if (inputWeight <= 0 || outputWeight <= 0) {
+      alert("Please enter valid weights greater than 0")
+      return
+    }
+
+    const loss = inputWeight - outputWeight
     const efficiency = (outputWeight / inputWeight) * 100
 
-    addMeltingBatch({
+    const batch: MeltingBatch = {
+      id: `MEL-${String(batches.length + 1).padStart(3, '0')}`,
       inputWeight,
       inputPurity,
       outputWeight,
       outputPurity,
-      weightChange,
+      loss,
       efficiency: parseFloat(efficiency.toFixed(1)),
       date: new Date().toISOString().split('T')[0],
-      status: "completed",
+      status: 'completed',
       notes: newBatch.notes || undefined
-    })
+    }
 
+    setBatches([batch, ...batches])
     setNewBatch({
       inputWeight: "",
       inputPurity: "917",
@@ -402,13 +145,28 @@ export default function MeltingPage() {
     setShowNewBatchForm(false)
   }
 
+  const handleDeleteBatch = (batchId: string) => {
+    if (confirm("Are you sure you want to delete this batch?")) {
+      setBatches(batches.filter(batch => batch.id !== batchId))
+    }
+  }
+
+  const handleViewDetails = (batchId: string) => {
+    // In a real app, this would open a detail view or dialog
+    console.log("Viewing details for batch:", batchId)
+    // You can implement a dialog or navigate to detail page
+  }
+
   // Handle calculator calculation
   const calculateMelting = () => {
     const weight = parseFloat(calculatorInput.weight)
     const fromPurity = parseInt(calculatorInput.fromPurity)
     const toPurity = parseInt(calculatorInput.toPurity)
 
-    if (!weight || weight <= 0) return
+    if (!weight || weight <= 0) {
+      alert("Please enter a valid weight greater than 0")
+      return
+    }
 
     const pureGold = (weight * fromPurity) / 1000
     const outputWeight = (pureGold * 1000) / toPurity
@@ -425,19 +183,20 @@ export default function MeltingPage() {
     if (efficiency >= 99) return "bg-green-100 text-green-800"
     if (efficiency >= 97) return "bg-amber-100 text-amber-800"
     return "bg-rose-100 text-rose-800"
->>>>>>> afbfbfd (update_responsive_fixes)
   }
 
-  const getWeightChangeDisplay = (weightChange: number) => {
-    if (weightChange > 0) return `+${weightChange.toFixed(1)}g`
-    if (weightChange < 0) return `${weightChange.toFixed(1)}g`
-    return "0g"
+  const getLossColor = (loss: number) => {
+    if (loss === 0) return "text-gray-600"
+    return "text-rose-600"
   }
 
-  const getWeightChangeColor = (weightChange: number) => {
-    if (weightChange > 0) return "text-green-600"
-    if (weightChange < 0) return "text-rose-600"
-    return "text-slate-600"
+  const getStatusBadge = (status: MeltingBatch['status']) => {
+    const variants = {
+      completed: { bg: "bg-green-100 text-green-800", label: "Completed" },
+      'in-progress': { bg: "bg-blue-100 text-blue-800", label: "In Progress" },
+      planned: { bg: "bg-gray-100 text-gray-800", label: "Planned" }
+    }
+    return variants[status]
   }
 
   // Show loading state during SSR
@@ -458,14 +217,10 @@ export default function MeltingPage() {
           <p className="text-slate-600 mt-1">Track gold melting batches and purity conversions</p>
         </div>
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-<<<<<<< HEAD
-          <Button className="gap-2 w-full sm:w-auto" onClick={handleNewBatch}>
-=======
           <Button 
             className="gap-2 w-full sm:w-auto"
             onClick={() => setShowNewBatchForm(true)}
           >
->>>>>>> afbfbfd (update_responsive_fixes)
             <Plus className="w-4 h-4" />
             New Melting Batch
           </Button>
@@ -475,7 +230,6 @@ export default function MeltingPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {[
-<<<<<<< HEAD
           { 
             title: "Total Batches", 
             value: totalBatches.toString(), 
@@ -484,7 +238,7 @@ export default function MeltingPage() {
             description: "All time batches"
           },
           { 
-            title: "Melting Loss", 
+            title: "Total Loss", 
             value: `${totalLoss.toFixed(1)}g`, 
             icon: TrendingDown, 
             color: "text-rose-600",
@@ -492,7 +246,7 @@ export default function MeltingPage() {
           },
           { 
             title: "Avg Efficiency", 
-            value: `${avgEfficiency.toFixed(1)}%`, 
+            value: batches.length > 0 ? `${avgEfficiency.toFixed(1)}%` : "0%", 
             icon: Calculator, 
             color: "text-emerald-600",
             description: "Overall average"
@@ -504,12 +258,6 @@ export default function MeltingPage() {
             color: "text-blue-600",
             description: "Current month"
           },
-=======
-          { title: "Total Batches", value: totalBatches.toString(), icon: Flame, color: "text-orange-600" },
-          { title: "Net Loss", value: `${(totalLoss - totalGain).toFixed(1)}g`, icon: TrendingDown, color: "text-rose-600" },
-          { title: "Avg Efficiency", value: `${avgEfficiency.toFixed(1)}%`, icon: Calculator, color: "text-emerald-600" },
-          { title: "This Month", value: thisMonthBatches.toString(), icon: History, color: "text-blue-600" },
->>>>>>> afbfbfd (update_responsive_fixes)
         ].map((stat, index) => (
           <motion.div key={index} whileHover={{ scale: 1.02 }}>
             <Card>
@@ -540,38 +288,29 @@ export default function MeltingPage() {
             <CardHeader>
               <CardTitle>Melting Batches</CardTitle>
               <CardDescription>
-                Recent gold melting operations • {batches.length} total batches
+                {batches.length > 0 
+                  ? `Recent gold melting operations • ${batches.length} total batches • Total Loss: ${totalLoss.toFixed(1)}g`
+                  : "Track your gold melting batches and monitor efficiency"
+                }
               </CardDescription>
             </CardHeader>
             <CardContent>
-<<<<<<< HEAD
               {batches.length === 0 ? (
                 <div className="text-center py-12">
                   <Flame className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900">No melting batches yet</h3>
-                  <p className="text-gray-500 mt-1">Start by creating your first melting batch</p>
-                  <Button onClick={handleNewBatch} className="mt-4 gap-2">
-                    <Plus className="w-4 h-4" />
-                    Create First Batch
-=======
-              {meltingBatches.length === 0 ? (
-                <div className="text-center py-12">
-                  <Flame className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900">No melting batches</h3>
-                  <p className="text-gray-500 mt-1">Create your first melting batch to get started</p>
+                  <p className="text-gray-500 mt-1">Start by creating your first melting batch to track efficiency and losses</p>
                   <Button 
                     onClick={() => setShowNewBatchForm(true)} 
                     className="mt-4 gap-2"
                   >
                     <Plus className="w-4 h-4" />
-                    New Batch
->>>>>>> afbfbfd (update_responsive_fixes)
+                    Create First Batch
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
-<<<<<<< HEAD
-                  {batches.map((batch, index) => {
+                  {batches.map((batch) => {
                     const statusBadge = getStatusBadge(batch.status)
                     return (
                       <motion.div 
@@ -592,62 +331,50 @@ export default function MeltingPage() {
                                 {statusBadge.label}
                               </Badge>
                             </div>
-                            <p className="text-sm text-slate-500 mt-1">{batch.date}</p>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1">
+                              <p className="text-sm text-slate-500">{batch.date}</p>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-sm font-medium ${getLossColor(batch.loss)}`}>
+                                  Loss: {batch.loss.toFixed(1)}g
+                                </span>
+                                {batch.loss > 0 && (
+                                  <span className="text-xs text-slate-500">
+                                    ({((batch.loss / batch.inputWeight) * 100).toFixed(1)}%)
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            {batch.notes && (
+                              <p className="text-xs text-slate-500 mt-1">Note: {batch.notes}</p>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
-                          <Badge variant="outline" className={getEfficiencyColor(batch.efficiency)}>
+                          <Badge className={getEfficiencyColor(batch.efficiency)}>
                             {batch.efficiency.toFixed(1)}% eff.
                           </Badge>
-                          <span className="text-sm text-rose-600 whitespace-nowrap">Loss: {batch.loss}g</span>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => handleViewDetails(batch.id)}
-                            className="gap-1"
-                          >
-                            <Eye className="w-3 h-3" />
-                            Details
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleViewDetails(batch.id)}
+                              className="gap-1"
+                            >
+                              <Eye className="w-3 h-3" />
+                              Details
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeleteBatch(batch.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       </motion.div>
                     )
                   })}
-=======
-                  {meltingBatches.map((batch) => (
-                    <motion.div key={batch.id} whileHover={{ scale: 1.01 }} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <Badge variant="outline" className="bg-orange-50 text-orange-700">
-                          {batch.id}
-                        </Badge>
-                        <div>
-                          <p className="font-medium">
-                            Input: {batch.inputWeight}g {batch.inputPurity} → Output: {batch.outputWeight}g {batch.outputPurity}
-                          </p>
-                          <p className="text-sm text-slate-500">{batch.date}</p>
-                          {batch.notes && (
-                            <p className="text-xs text-slate-500 mt-1">Note: {batch.notes}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <Badge className={getEfficiencyColor(batch.efficiency)}>
-                          {batch.efficiency}% eff.
-                        </Badge>
-                        <span className={`text-sm font-medium ${getWeightChangeColor(batch.weightChange)}`}>
-                          {getWeightChangeDisplay(batch.weightChange)}
-                        </span>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => deleteMeltingBatch(batch.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))}
->>>>>>> afbfbfd (update_responsive_fixes)
                 </div>
               )}
             </CardContent>
@@ -659,15 +386,26 @@ export default function MeltingPage() {
           <Card>
             <CardHeader>
               <CardTitle>Melting Efficiency</CardTitle>
-              <CardDescription>Performance metrics and trends by purity conversion</CardDescription>
+              <CardDescription>
+                {batches.length > 0 
+                  ? "Performance metrics and trends by purity conversion"
+                  : "Efficiency metrics will appear here after creating batches"
+                }
+              </CardDescription>
             </CardHeader>
             <CardContent>
-<<<<<<< HEAD
-              {efficiencyStats.filter(stat => stat.totalBatches > 0).length === 0 ? (
+              {batches.length === 0 ? (
                 <div className="text-center py-12">
                   <Calculator className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900">No efficiency data</h3>
-                  <p className="text-gray-500 mt-1">Complete some melting batches to see efficiency metrics</p>
+                  <p className="text-gray-500 mt-1">Complete some melting batches to see efficiency metrics and trends</p>
+                  <Button 
+                    onClick={() => setShowNewBatchForm(true)} 
+                    className="mt-4 gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create First Batch
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -684,48 +422,23 @@ export default function MeltingPage() {
                           <p className="text-sm text-slate-500">{item.totalBatches} batch{item.totalBatches !== 1 ? 'es' : ''}</p>
                         </div>
                         <div className="flex items-center gap-4">
-                          <Badge variant="outline" className={getEfficiencyColor(item.avgEfficiency)}>
+                          <Badge className={getEfficiencyColor(item.avgEfficiency)}>
                             {item.avgEfficiency.toFixed(1)}% avg
                           </Badge>
-                          <span className="text-sm text-rose-600 whitespace-nowrap">{item.totalLoss.toFixed(1)}g loss</span>
+                          <div className="flex flex-col items-end">
+                            <span className={`text-sm font-medium ${getLossColor(item.totalLoss)}`}>
+                              {item.totalLoss.toFixed(1)}g loss
+                            </span>
+                            {item.totalBatches > 0 && (
+                              <span className="text-xs text-slate-500">
+                                Avg: {(item.totalLoss / item.totalBatches).toFixed(1)}g/batch
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </motion.div>
                     ))
                   }
-=======
-              {meltingBatches.length === 0 ? (
-                <div className="text-center py-12">
-                  <Calculator className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900">No efficiency data</h3>
-                  <p className="text-gray-500 mt-1">Create melting batches to see efficiency metrics</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {Array.from(new Set(meltingBatches.map(b => `${b.inputPurity} to ${b.outputPurity}`))).map((purity, index) => {
-                    const batchesForPurity = meltingBatches.filter(b => 
-                      `${b.inputPurity} to ${b.outputPurity}` === purity
-                    )
-                    const avgEff = batchesForPurity.reduce((sum, b) => sum + b.efficiency, 0) / batchesForPurity.length
-                    const totalWeightChange = batchesForPurity.reduce((sum, b) => sum + b.weightChange, 0)
-
-                    return (
-                      <motion.div key={index} whileHover={{ scale: 1.01 }} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <p className="font-medium">{purity}</p>
-                          <p className="text-sm text-slate-500">{batchesForPurity.length} batches</p>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <Badge variant="outline" className="bg-green-50 text-green-700">
-                            {avgEff.toFixed(1)}%
-                          </Badge>
-                          <span className={`text-sm font-medium ${getWeightChangeColor(totalWeightChange)}`}>
-                            {getWeightChangeDisplay(totalWeightChange)}
-                          </span>
-                        </div>
-                      </motion.div>
-                    )
-                  })}
->>>>>>> afbfbfd (update_responsive_fixes)
                 </div>
               )}
             </CardContent>
@@ -737,19 +450,7 @@ export default function MeltingPage() {
           <Card>
             <CardHeader>
               <CardTitle>Melting Calculator</CardTitle>
-<<<<<<< HEAD
-              <CardDescription>Calculate expected output and efficiency</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4 p-4 border rounded-lg bg-slate-50">
-                <p className="text-sm text-slate-600">
-                  Melting calculator functionality will be implemented here.
-                </p>
-                <p className="text-xs text-slate-500">
-                  Features: Input purity conversion, expected output calculation, efficiency estimation.
-                </p>
-=======
-              <CardDescription>Calculate expected output and loss</CardDescription>
+              <CardDescription>Calculate expected output and loss for purity conversions</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -759,6 +460,7 @@ export default function MeltingPage() {
                     <Input
                       id="weight"
                       type="number"
+                      step="0.001"
                       placeholder="Enter weight"
                       value={calculatorInput.weight}
                       onChange={(e) => setCalculatorInput({...calculatorInput, weight: e.target.value})}
@@ -776,6 +478,8 @@ export default function MeltingPage() {
                         <SelectItem value="917">917</SelectItem>
                         <SelectItem value="875">875</SelectItem>
                         <SelectItem value="750">750</SelectItem>
+                        <SelectItem value="585">585</SelectItem>
+                        <SelectItem value="375">375</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -791,6 +495,8 @@ export default function MeltingPage() {
                         <SelectItem value="917">917</SelectItem>
                         <SelectItem value="875">875</SelectItem>
                         <SelectItem value="750">750</SelectItem>
+                        <SelectItem value="585">585</SelectItem>
+                        <SelectItem value="375">375</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -814,12 +520,21 @@ export default function MeltingPage() {
                       </div>
                       <div className="flex justify-between">
                         <span>Expected Loss:</span>
-                        <span className="font-medium text-rose-600">{calculatorResult.loss}g</span>
+                        <span className={`font-medium ${calculatorResult.loss > 0 ? 'text-rose-600' : 'text-gray-600'}`}>
+                          {calculatorResult.loss.toFixed(3)}g
+                        </span>
                       </div>
+                      {calculatorResult.loss > 0 && (
+                        <div className="flex justify-between">
+                          <span>Loss Percentage:</span>
+                          <span className="font-medium text-rose-600">
+                            {((calculatorResult.loss / parseFloat(calculatorInput.weight)) * 100).toFixed(2)}%
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
->>>>>>> afbfbfd (update_responsive_fixes)
               </div>
             </CardContent>
           </Card>
@@ -828,7 +543,7 @@ export default function MeltingPage() {
 
       {/* New Batch Dialog */}
       {showNewBatchForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle>New Melting Batch</CardTitle>
@@ -842,7 +557,7 @@ export default function MeltingPage() {
                     id="inputWeight"
                     type="number"
                     step="0.001"
-                    placeholder="Weight"
+                    placeholder="0.000"
                     value={newBatch.inputWeight}
                     onChange={(e) => setNewBatch({...newBatch, inputWeight: e.target.value})}
                   />
@@ -859,6 +574,8 @@ export default function MeltingPage() {
                       <SelectItem value="917">917</SelectItem>
                       <SelectItem value="875">875</SelectItem>
                       <SelectItem value="750">750</SelectItem>
+                      <SelectItem value="585">585</SelectItem>
+                      <SelectItem value="375">375</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -868,7 +585,7 @@ export default function MeltingPage() {
                     id="outputWeight"
                     type="number"
                     step="0.001"
-                    placeholder="Weight"
+                    placeholder="0.000"
                     value={newBatch.outputWeight}
                     onChange={(e) => setNewBatch({...newBatch, outputWeight: e.target.value})}
                   />
@@ -885,10 +602,32 @@ export default function MeltingPage() {
                       <SelectItem value="917">917</SelectItem>
                       <SelectItem value="875">875</SelectItem>
                       <SelectItem value="750">750</SelectItem>
+                      <SelectItem value="585">585</SelectItem>
+                      <SelectItem value="375">375</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+
+              {/* Auto-calculated loss preview */}
+              {newBatch.inputWeight && newBatch.outputWeight && (
+                <div className="p-3 border rounded-lg bg-slate-50">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Calculated Loss:</span>
+                    <span className={`font-bold ${parseFloat(newBatch.inputWeight) > parseFloat(newBatch.outputWeight) ? 'text-rose-600' : 'text-green-600'}`}>
+                      {(parseFloat(newBatch.inputWeight) - parseFloat(newBatch.outputWeight)).toFixed(3)}g
+                    </span>
+                  </div>
+                  {parseFloat(newBatch.inputWeight) > 0 && (
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-sm text-slate-500">Efficiency:</span>
+                      <span className="text-sm font-medium">
+                        {((parseFloat(newBatch.outputWeight) / parseFloat(newBatch.inputWeight)) * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
               
               <div>
                 <Label htmlFor="notes">Notes (Optional)</Label>
@@ -901,7 +640,11 @@ export default function MeltingPage() {
               </div>
               
               <div className="flex gap-2">
-                <Button onClick={handleAddBatch} className="flex-1">
+                <Button 
+                  onClick={handleAddBatch} 
+                  className="flex-1" 
+                  disabled={!newBatch.inputWeight || !newBatch.outputWeight || parseFloat(newBatch.inputWeight) <= 0 || parseFloat(newBatch.outputWeight) <= 0}
+                >
                   Add Batch
                 </Button>
                 <Button variant="outline" onClick={() => setShowNewBatchForm(false)}>
