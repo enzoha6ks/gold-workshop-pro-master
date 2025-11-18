@@ -168,7 +168,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -323,22 +323,30 @@ import { useMeltingStore } from "@/lib/store"
 
 export default function MeltingPage() {
   const [activeTab, setActiveTab] = useState("batches")
+  const [showNewBatchForm, setShowNewBatchForm] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+  
   const { 
     meltingBatches, 
     addMeltingBatch, 
     deleteMeltingBatch,
     getTotalMeltingLoss,
+    getTotalMeltingGain,
     getAverageEfficiency 
   } = useMeltingStore()
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // New batch form state
   const [newBatch, setNewBatch] = useState({
     inputWeight: "",
     inputPurity: "917",
     outputWeight: "",
-    outputPurity: "995"
+    outputPurity: "995",
+    notes: ""
   })
-  const [showNewBatchForm, setShowNewBatchForm] = useState(false)
 
   // Calculator state
   const [calculatorInput, setCalculatorInput] = useState({
@@ -352,13 +360,14 @@ export default function MeltingPage() {
     loss: number
   } | null>(null)
 
-  // Calculate stats from store
-  const totalBatches = meltingBatches.length
-  const totalLoss = getTotalMeltingLoss()
-  const avgEfficiency = getAverageEfficiency()
-  const thisMonthBatches = meltingBatches.filter(batch => 
+  // Calculate stats using store functions - use 0 during SSR to avoid hydration mismatch
+  const totalBatches = isClient ? meltingBatches.length : 0
+  const totalLoss = isClient ? getTotalMeltingLoss() : 0
+  const totalGain = isClient ? getTotalMeltingGain() : 0
+  const avgEfficiency = isClient ? getAverageEfficiency() : 0
+  const thisMonthBatches = isClient ? meltingBatches.filter(batch => 
     new Date(batch.date).getMonth() === new Date().getMonth()
-  ).length
+  ).length : 0
 
   // Handle new batch submission
   const handleAddBatch = () => {
@@ -368,7 +377,7 @@ export default function MeltingPage() {
     const outputWeight = parseFloat(newBatch.outputWeight)
     const inputPurity = parseInt(newBatch.inputPurity)
     const outputPurity = parseInt(newBatch.outputPurity)
-    const loss = inputWeight - outputWeight
+    const weightChange = outputWeight - inputWeight // Can be positive (gain) or negative (loss)
     const efficiency = (outputWeight / inputWeight) * 100
 
     addMeltingBatch({
@@ -376,17 +385,19 @@ export default function MeltingPage() {
       inputPurity,
       outputWeight,
       outputPurity,
-      loss,
+      weightChange,
       efficiency: parseFloat(efficiency.toFixed(1)),
       date: new Date().toISOString().split('T')[0],
-      status: "completed"
+      status: "completed",
+      notes: newBatch.notes || undefined
     })
 
     setNewBatch({
       inputWeight: "",
       inputPurity: "917",
       outputWeight: "",
-      outputPurity: "995"
+      outputPurity: "995",
+      notes: ""
     })
     setShowNewBatchForm(false)
   }
@@ -415,6 +426,23 @@ export default function MeltingPage() {
     if (efficiency >= 97) return "bg-amber-100 text-amber-800"
     return "bg-rose-100 text-rose-800"
 >>>>>>> afbfbfd (update_responsive_fixes)
+  }
+
+  const getWeightChangeDisplay = (weightChange: number) => {
+    if (weightChange > 0) return `+${weightChange.toFixed(1)}g`
+    if (weightChange < 0) return `${weightChange.toFixed(1)}g`
+    return "0g"
+  }
+
+  const getWeightChangeColor = (weightChange: number) => {
+    if (weightChange > 0) return "text-green-600"
+    if (weightChange < 0) return "text-rose-600"
+    return "text-slate-600"
+  }
+
+  // Show loading state during SSR
+  if (!isClient) {
+    return <div className="p-4 flex items-center justify-center min-h-screen">Loading...</div>
   }
 
   return (
@@ -478,7 +506,7 @@ export default function MeltingPage() {
           },
 =======
           { title: "Total Batches", value: totalBatches.toString(), icon: Flame, color: "text-orange-600" },
-          { title: "Melting Loss", value: `${totalLoss.toFixed(1)}g`, icon: TrendingDown, color: "text-rose-600" },
+          { title: "Net Loss", value: `${(totalLoss - totalGain).toFixed(1)}g`, icon: TrendingDown, color: "text-rose-600" },
           { title: "Avg Efficiency", value: `${avgEfficiency.toFixed(1)}%`, icon: Calculator, color: "text-emerald-600" },
           { title: "This Month", value: thisMonthBatches.toString(), icon: History, color: "text-blue-600" },
 >>>>>>> afbfbfd (update_responsive_fixes)
@@ -597,13 +625,18 @@ export default function MeltingPage() {
                             Input: {batch.inputWeight}g {batch.inputPurity} → Output: {batch.outputWeight}g {batch.outputPurity}
                           </p>
                           <p className="text-sm text-slate-500">{batch.date}</p>
+                          {batch.notes && (
+                            <p className="text-xs text-slate-500 mt-1">Note: {batch.notes}</p>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <Badge className={getEfficiencyColor(batch.efficiency)}>
                           {batch.efficiency}% eff.
                         </Badge>
-                        <span className="text-sm text-rose-600">Loss: {batch.loss}g</span>
+                        <span className={`text-sm font-medium ${getWeightChangeColor(batch.weightChange)}`}>
+                          {getWeightChangeDisplay(batch.weightChange)}
+                        </span>
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -673,7 +706,7 @@ export default function MeltingPage() {
                       `${b.inputPurity} to ${b.outputPurity}` === purity
                     )
                     const avgEff = batchesForPurity.reduce((sum, b) => sum + b.efficiency, 0) / batchesForPurity.length
-                    const totalLoss = batchesForPurity.reduce((sum, b) => sum + b.loss, 0)
+                    const totalWeightChange = batchesForPurity.reduce((sum, b) => sum + b.weightChange, 0)
 
                     return (
                       <motion.div key={index} whileHover={{ scale: 1.01 }} className="flex items-center justify-between p-4 border rounded-lg">
@@ -685,7 +718,9 @@ export default function MeltingPage() {
                           <Badge variant="outline" className="bg-green-50 text-green-700">
                             {avgEff.toFixed(1)}%
                           </Badge>
-                          <span className="text-sm text-rose-600">{totalLoss.toFixed(1)}g loss</span>
+                          <span className={`text-sm font-medium ${getWeightChangeColor(totalWeightChange)}`}>
+                            {getWeightChangeDisplay(totalWeightChange)}
+                          </span>
                         </div>
                       </motion.div>
                     )
@@ -794,7 +829,7 @@ export default function MeltingPage() {
       {/* New Batch Dialog */}
       {showNewBatchForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md">
+          <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle>New Melting Batch</CardTitle>
               <CardDescription>Add a completed melting batch</CardDescription>
@@ -806,6 +841,7 @@ export default function MeltingPage() {
                   <Input
                     id="inputWeight"
                     type="number"
+                    step="0.001"
                     placeholder="Weight"
                     value={newBatch.inputWeight}
                     onChange={(e) => setNewBatch({...newBatch, inputWeight: e.target.value})}
@@ -831,6 +867,7 @@ export default function MeltingPage() {
                   <Input
                     id="outputWeight"
                     type="number"
+                    step="0.001"
                     placeholder="Weight"
                     value={newBatch.outputWeight}
                     onChange={(e) => setNewBatch({...newBatch, outputWeight: e.target.value})}
@@ -852,6 +889,17 @@ export default function MeltingPage() {
                   </Select>
                 </div>
               </div>
+              
+              <div>
+                <Label htmlFor="notes">Notes (Optional)</Label>
+                <Input
+                  id="notes"
+                  placeholder="Any additional notes..."
+                  value={newBatch.notes}
+                  onChange={(e) => setNewBatch({...newBatch, notes: e.target.value})}
+                />
+              </div>
+              
               <div className="flex gap-2">
                 <Button onClick={handleAddBatch} className="flex-1">
                   Add Batch
