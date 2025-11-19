@@ -1,26 +1,89 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { Save, Bell, Shield, Database, Palette } from "lucide-react"
+import { Save, Bell, Shield, Database, Palette, Moon, Sun, Monitor } from "lucide-react"
+import { useTheme } from "@/contexts/theme-provider"
+import { toast } from "sonner"
 
 export default function SettingsPage() {
+  const { theme, setTheme } = useTheme()
   const [settings, setSettings] = useState({
     notifications: true,
     autoBackup: true,
     privateMode: false,
-    darkMode: false,
     goldRateAlerts: true
   })
 
+  // Initialize settings from localStorage
+  useEffect(() => {
+    const savedSettings = localStorage.getItem("goldpro-settings")
+    if (savedSettings) {
+      setSettings(JSON.parse(savedSettings))
+    }
+  }, [])
+
   const updateSetting = (key: string, value: boolean) => {
-    setSettings(prev => ({ ...prev, [key]: value }))
+    const newSettings = { ...settings, [key]: value }
+    setSettings(newSettings)
+    localStorage.setItem("goldpro-settings", JSON.stringify(newSettings))
   }
+
+  const handleSaveChanges = () => {
+    localStorage.setItem("goldpro-settings", JSON.stringify(settings))
+    toast.success("Settings saved successfully!")
+  }
+
+  const handleExportData = () => {
+    // Implement data export logic
+    const data = {
+      settings,
+      theme,
+      exportDate: new Date().toISOString()
+    }
+    const dataStr = JSON.stringify(data, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `goldpro-settings-${new Date().toISOString().split('T')[0]}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+    toast.success("Settings exported successfully!")
+  }
+
+  const handleBackupNow = () => {
+    localStorage.setItem("goldpro-last-backup", new Date().toLocaleString())
+    toast.success("Data backed up successfully!")
+  }
+
+  const handleClearData = () => {
+    if (confirm("Are you sure you want to clear all data? This action cannot be undone.")) {
+      localStorage.clear()
+      toast.success("All data cleared successfully!")
+      // Reload the page to reset the application
+      setTimeout(() => window.location.reload(), 1000)
+    }
+  }
+
+  const getSystemInfo = () => {
+    const dataSize = JSON.stringify(localStorage).length / 1024 / 1024 // Convert to MB
+    const lastBackup = localStorage.getItem("goldpro-last-backup") || "Never"
+    
+    return {
+      version: "1.0.0",
+      lastBackup,
+      dataSize: dataSize.toFixed(2) + " MB",
+      transactions: Object.keys(localStorage).length + " items"
+    }
+  }
+
+  const systemInfo = getSystemInfo()
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -31,11 +94,11 @@ export default function SettingsPage() {
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Settings</h1>
-          <p className="text-slate-600 mt-1">Manage your workshop preferences</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">Settings</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-1">Manage your workshop preferences</p>
         </div>
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Button className="gap-2 w-full sm:w-auto">
+          <Button onClick={handleSaveChanges} className="gap-2 w-full sm:w-auto">
             <Save className="w-4 h-4" />
             Save Changes
           </Button>
@@ -45,21 +108,77 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Settings Categories */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Appearance Settings */}
+          <motion.div whileHover={{ scale: 1.01 }}>
+            <Card className="dark:bg-slate-900 dark:border-slate-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 dark:text-slate-100">
+                  <Palette className="w-5 h-5" />
+                  Appearance
+                </CardTitle>
+                <CardDescription className="dark:text-slate-400">Customize the interface appearance</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <Label className="text-sm font-medium dark:text-slate-300">Theme</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <Button
+                      variant={theme === "light" ? "default" : "outline"}
+                      onClick={() => setTheme("light")}
+                      className="flex flex-col items-center gap-2 h-auto py-4 dark:border-slate-700 dark:text-slate-300"
+                    >
+                      <Sun className="w-5 h-5" />
+                      <span>Light</span>
+                    </Button>
+                    <Button
+                      variant={theme === "dark" ? "default" : "outline"}
+                      onClick={() => setTheme("dark")}
+                      className="flex flex-col items-center gap-2 h-auto py-4 dark:border-slate-700 dark:text-slate-300"
+                    >
+                      <Moon className="w-5 h-5" />
+                      <span>Dark</span>
+                    </Button>
+                    <Button
+                      variant={theme === "system" ? "default" : "outline"}
+                      onClick={() => setTheme("system")}
+                      className="flex flex-col items-center gap-2 h-auto py-4 dark:border-slate-700 dark:text-slate-300"
+                    >
+                      <Monitor className="w-5 h-5" />
+                      <span>System</span>
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="privateMode" className="dark:text-slate-300">Private Mode</Label>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Hide gold stock values from dashboard</p>
+                  </div>
+                  <Switch
+                    id="privateMode"
+                    checked={settings.privateMode}
+                    onCheckedChange={(value) => updateSetting('privateMode', value)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
           {/* Notification Settings */}
           <motion.div whileHover={{ scale: 1.01 }}>
-            <Card>
+            <Card className="dark:bg-slate-900 dark:border-slate-800">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 dark:text-slate-100">
                   <Bell className="w-5 h-5" />
                   Notifications
                 </CardTitle>
-                <CardDescription>Manage your alert preferences</CardDescription>
+                <CardDescription className="dark:text-slate-400">Manage your alert preferences</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="notifications">Push Notifications</Label>
-                    <p className="text-sm text-slate-500">Receive alerts for important events</p>
+                    <Label htmlFor="notifications" className="dark:text-slate-300">Push Notifications</Label>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Receive alerts for important events</p>
                   </div>
                   <Switch
                     id="notifications"
@@ -70,8 +189,8 @@ export default function SettingsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="goldRateAlerts">Gold Rate Alerts</Label>
-                    <p className="text-sm text-slate-500">Get notified about gold price changes</p>
+                    <Label htmlFor="goldRateAlerts" className="dark:text-slate-300">Gold Rate Alerts</Label>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Get notified about gold price changes</p>
                   </div>
                   <Switch
                     id="goldRateAlerts"
@@ -85,62 +204,24 @@ export default function SettingsPage() {
 
           {/* Security Settings */}
           <motion.div whileHover={{ scale: 1.01 }}>
-            <Card>
+            <Card className="dark:bg-slate-900 dark:border-slate-800">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 dark:text-slate-100">
                   <Shield className="w-5 h-5" />
                   Security & Privacy
                 </CardTitle>
-                <CardDescription>Protect your workshop data</CardDescription>
+                <CardDescription className="dark:text-slate-400">Protect your workshop data</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="privateMode">Private Mode</Label>
-                    <p className="text-sm text-slate-500">Hide gold stock values from dashboard</p>
-                  </div>
-                  <Switch
-                    id="privateMode"
-                    checked={settings.privateMode}
-                    onCheckedChange={(value) => updateSetting('privateMode', value)}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="autoBackup">Auto Backup</Label>
-                    <p className="text-sm text-slate-500">Automatically backup your data daily</p>
+                    <Label htmlFor="autoBackup" className="dark:text-slate-300">Auto Backup</Label>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Automatically backup your data daily</p>
                   </div>
                   <Switch
                     id="autoBackup"
                     checked={settings.autoBackup}
                     onCheckedChange={(value) => updateSetting('autoBackup', value)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Appearance Settings */}
-          <motion.div whileHover={{ scale: 1.01 }}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Palette className="w-5 h-5" />
-                  Appearance
-                </CardTitle>
-                <CardDescription>Customize the interface</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="darkMode">Dark Mode</Label>
-                    <p className="text-sm text-slate-500">Switch to dark theme</p>
-                  </div>
-                  <Switch
-                    id="darkMode"
-                    checked={settings.darkMode}
-                    onCheckedChange={(value) => updateSetting('darkMode', value)}
                   />
                 </div>
               </CardContent>
@@ -152,22 +233,34 @@ export default function SettingsPage() {
         <div className="space-y-6">
           {/* Data Management */}
           <motion.div whileHover={{ scale: 1.02 }}>
-            <Card>
+            <Card className="dark:bg-slate-900 dark:border-slate-800">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 dark:text-slate-100">
                   <Database className="w-5 h-5" />
                   Data Management
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  onClick={handleExportData} 
+                  className="w-full justify-start dark:border-slate-700 dark:text-slate-300 hover:dark:bg-slate-800"
+                >
                   Export All Data
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  onClick={handleBackupNow} 
+                  className="w-full justify-start dark:border-slate-700 dark:text-slate-300 hover:dark:bg-slate-800"
+                >
                   Backup Now
                 </Button>
-                <Separator />
-                <Button variant="outline" className="w-full justify-start text-rose-600 hover:text-rose-700">
+                <Separator className="dark:bg-slate-700" />
+                <Button 
+                  variant="outline" 
+                  onClick={handleClearData}
+                  className="w-full justify-start text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 dark:border-slate-700 hover:dark:bg-slate-800"
+                >
                   Clear All Data
                 </Button>
               </CardContent>
@@ -176,26 +269,26 @@ export default function SettingsPage() {
 
           {/* System Info */}
           <motion.div whileHover={{ scale: 1.02 }}>
-            <Card>
+            <Card className="dark:bg-slate-900 dark:border-slate-800">
               <CardHeader>
-                <CardTitle>System Information</CardTitle>
+                <CardTitle className="dark:text-slate-100">System Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Version</span>
-                  <span className="font-medium">1.0.0</span>
+                  <span className="text-slate-600 dark:text-slate-400">Version</span>
+                  <span className="font-medium dark:text-slate-300">{systemInfo.version}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Last Backup</span>
-                  <span className="font-medium">2 hours ago</span>
+                  <span className="text-slate-600 dark:text-slate-400">Last Backup</span>
+                  <span className="font-medium dark:text-slate-300">{systemInfo.lastBackup}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Data Size</span>
-                  <span className="font-medium">4.7 MB</span>
+                  <span className="text-slate-600 dark:text-slate-400">Data Size</span>
+                  <span className="font-medium dark:text-slate-300">{systemInfo.dataSize}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Transactions</span>
-                  <span className="font-medium">142 records</span>
+                  <span className="text-slate-600 dark:text-slate-400">Storage Items</span>
+                  <span className="font-medium dark:text-slate-300">{systemInfo.transactions}</span>
                 </div>
               </CardContent>
             </Card>
