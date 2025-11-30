@@ -436,4 +436,5 @@ For issues, questions, or suggestions:
 
 **Status:** ✅ Active Development  
 **Version:** 0.1.0  
-**Last Updated:** November 30, 2025
+**Last Updated:** November 30, 2025  
+**Repository:** [gold-workshop-pro-master](https://github.com/enzoha6ks/gold-workshop-pro-master)
