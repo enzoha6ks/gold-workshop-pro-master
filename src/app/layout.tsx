@@ -46,7 +46,7 @@
 // }
 
 
-
+import { Analytics } from "@vercel/analytics/next"
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -74,6 +74,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className="h-full">
       <body className={`${inter.className} h-full`} suppressHydrationWarning>
         <ThemeProvider defaultTheme="system" storageKey="goldpro-ui-theme">
+          
           <div className="min-h-full bg-slate-50 dark:bg-slate-900 flex flex-col">
             <div className="flex flex-1 overflow-hidden">
               {/* Sidebar - Hidden on mobile, shown on desktop */}
@@ -86,6 +87,7 @@ export default function RootLayout({
                 <Header />
                 <main className="flex-1 overflow-auto bg-slate-50 dark:bg-slate-900">
                   {children}
+                  <Analytics/>
                 </main>
               </div>
             </div>
