@@ -1,6 +1,8 @@
 
 
-//               "use client";
+
+
+// "use client";
 
 // import { useState, useRef } from "react";
 // import { motion } from "framer-motion";
@@ -62,7 +64,7 @@
 // }
 
 // export default function InvoicePage() {
-//   const invoiceRef = useRef<HTMLDivElement>(null);
+//   const invoiceRef = useRef(null);
 //   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
 //   // Empty invoice data - no dummy data
@@ -70,7 +72,9 @@
 //     id: "INV-001",
 //     invoiceNumber: "INV-2024-001",
 //     date: new Date().toISOString().split("T")[0],
-//     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+//     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+//       .toISOString()
+//       .split("T")[0],
 //     customerName: "",
 //     customerAddress: "",
 //     customerPhone: "",
@@ -83,7 +87,7 @@
 //         purity: 916,
 //         rate: 0,
 //         amount: 0,
-//       }
+//       },
 //     ],
 //     subtotal: 0,
 //     total: 0,
@@ -94,45 +98,38 @@
 //   // Format date consistently to avoid hydration issues
 //   const formatDate = (dateString: string) => {
 //     const date = new Date(dateString);
-//     return date.toLocaleDateString('en-US', {
-//       year: 'numeric',
-//       month: '2-digit',
-//       day: '2-digit'
+//     return date.toLocaleDateString("en-US", {
+//       year: "numeric",
+//       month: "2-digit",
+//       day: "2-digit",
 //     });
 //   };
 
 //   // Handle field changes
 //   const handleInputChange = (field: string, value: string | number) => {
-//     setInvoice((prev) => ({
-//       ...prev,
-//       [field]: value,
-//     }));
+//     setInvoice((prev) => ({ ...prev, [field]: value }));
 //   };
 
 //   // Handle item changes
-//   const handleItemChange = (itemId: string, field: string, value: string | number) => {
+//   const handleItemChange = (
+//     itemId: string,
+//     field: string,
+//     value: string | number
+//   ) => {
 //     setInvoice((prev) => ({
 //       ...prev,
-//       items: prev.items.map((item) =>
-//         item.id === itemId
-//           ? {
-//               ...item,
-//               [field]: value,
-//               amount: field === "quantity" || field === "weight" || field === "rate" || field === "amount"
-//                 ? calculateItemAmount({ ...item, [field]: value }, field)
-//                 : item.amount,
-//             }
-//           : item
-//       ),
+//       items: prev.items.map((item) => {
+//         if (item.id === itemId) {
+//           const updatedItem = { ...item, [field]: value };
+//           // Recalculate amount if quantity, weight, or rate changes
+//           if (field === "quantity" || field === "weight" || field === "rate") {
+//             updatedItem.amount = updatedItem.quantity * updatedItem.weight * updatedItem.rate;
+//           }
+//           return updatedItem;
+//         }
+//         return item;
+//       }),
 //     }));
-//   };
-
-//   // Calculate item amount - allow manual amount input
-//   const calculateItemAmount = (item: InvoiceItem, changedField: string) => {
-//     if (changedField === "amount") {
-//       return Number(item.amount);
-//     }
-//     return item.quantity * item.weight * item.rate;
 //   };
 
 //   // Add new item
@@ -174,25 +171,22 @@
 //       subtotal,
 //       total,
 //     }));
-    
 //     toast.success("Totals recalculated!");
 //   };
 
 //   // Save invoice
 //   const handleSaveInvoice = () => {
 //     recalculateTotals();
-    
+
 //     // Validate required fields
 //     if (!invoice.customerName.trim()) {
 //       toast.error("Please enter customer name");
 //       return;
 //     }
-    
-//     if (invoice.items.some(item => !item.description.trim())) {
+//     if (invoice.items.some((item) => !item.description.trim())) {
 //       toast.error("Please fill all item descriptions");
 //       return;
 //     }
-
 //     toast.success("Invoice saved successfully!");
 //   };
 
@@ -201,7 +195,9 @@
 //     const newInvoice = {
 //       ...invoice,
 //       id: `INV-${Date.now()}`,
-//       invoiceNumber: `INV-${new Date().getFullYear()}-${String(invoice.items.length + 1).padStart(3, "0")}`,
+//       invoiceNumber: `INV-${new Date().getFullYear()}-${String(
+//         invoice.items.length + 1
+//       ).padStart(3, "0")}`,
 //       date: new Date().toISOString().split("T")[0],
 //       status: "draft" as const,
 //     };
@@ -209,32 +205,45 @@
 //     toast.success("Invoice duplicated!");
 //   };
 
-//   // Fixed PDF Download function
+//   // Professional PDF Download function
 //   const handleDownloadPDF = () => {
 //     if (!invoice.customerName.trim()) {
 //       toast.error("Please enter customer name before downloading PDF");
 //       return;
 //     }
-    
-//     if (invoice.items.some(item => !item.description.trim())) {
+
+//     if (invoice.items.some((item) => !item.description.trim())) {
 //       toast.error("Please fill all item descriptions before downloading PDF");
 //       return;
 //     }
 
-//     // Generate table rows HTML
-//     const tableRowsHTML = invoice.items.map((item) => `
+//     // Generate table rows
+//     const tableRowsHTML = invoice.items
+//       .map(
+//         (item) => `
 //       <tr>
-//         <td><strong>${item.description || "Item description"}</strong></td>
-//         <td class="text-center"><strong>${item.quantity}</strong></td>
-//         <td class="text-right"><strong>${item.weight}g</strong></td>
-//         <td class="text-right"><strong>${item.purity}</strong></td>
-//         <td class="text-right"><strong>${item.rate.toLocaleString()}</strong></td>
-//         <td class="text-right"><strong>${item.amount.toLocaleString()}</strong></td>
+//         <td class="item-desc">${item.description}</td>
+//         <td class="text-center">${item.quantity}</td>
+//         <td class="text-right">${item.weight.toFixed(3)}g</td>
+//         <td class="text-right">${item.purity}‰</td>
+//         <td class="text-right">${item.rate.toLocaleString("en-US", {
+//           minimumFractionDigits: 2,
+//         })}</td>
+//         <td class="text-right amount">${item.amount.toLocaleString("en-US", {
+//           minimumFractionDigits: 3,
+//         })}</td>
 //       </tr>
-//     `).join('');
+//     `
+//       )
+//       .join("");
 
-//     // Create a new window for printing
-//     const printWindow = window.open('', '_blank');
+//     // Calculate tax (example: 5% VAT)
+//     const taxRate = 0.05;
+//     const subtotal = invoice.total;
+//     const taxAmount = subtotal * taxRate;
+//     const grandTotal = subtotal + taxAmount;
+
+//     const printWindow = window.open("", "_blank");
 //     if (!printWindow) {
 //       toast.error("Please allow popups to generate PDF");
 //       return;
@@ -243,341 +252,534 @@
 //     const htmlContent = `
 //       <!DOCTYPE html>
 //       <html>
-//         <head>
-//           <title>Invoice-${invoice.invoiceNumber}</title>
-//           <style>
-//             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+//       <head>
+//         <title>Invoice-${invoice.invoiceNumber}</title>
+//         <meta charset="utf-8" />
+//         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+//         <style>
+//           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+          
+//           * {
+//             margin: 0;
+//             padding: 0;
+//             box-sizing: border-box;
+//           }
+          
+//           body {
+//             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+//             background: #ffffff;
+//             color: #1a1a1a;
+//             line-height: 1.4;
+//             font-size: 10pt;
+//             -webkit-font-smoothing: antialiased;
+//             -moz-osx-font-smoothing: grayscale;
+//           }
             
-//             body { 
-//               font-family: 'Inter', Arial, sans-serif; 
-//               margin: 0; 
-//               padding: 0;
-//               color: #000000;
-//               background: #ffffff;
-//               font-weight: 600;
-//             }
-//             .invoice-container { 
-//               max-width: 210mm; 
-//               margin: 0 auto; 
-//               background: white;
+//             .invoice-container {
+//               max-width: 210mm;
+//               margin: 0 auto;
+//               padding: 20mm;
 //               min-height: 297mm;
-//               padding: 15mm;
-//               box-sizing: border-box;
+//               position: relative;
 //             }
-//             .letterhead {
-//               border-bottom: 4px solid #b8860b;
-//               padding-bottom: 12px;
-//               margin-bottom: 20px;
+            
+//             /* Header Section */
+//             .header {
+//               display: grid;
+//               grid-template-columns: 1fr auto;
+//               gap: 30px;
+//               margin-bottom: 30px;
+//               padding-bottom: 20px;
+//               border-bottom: 2px solid #e5e7eb;
 //             }
-//             .company-name {
-//               font-size: 32px;
-//               font-weight: 900;
-//               color: #000000;
-//               margin: 0;
-//               letter-spacing: -0.5px;
-//               text-transform: uppercase;
-//               text-align: center;
-//             }
-//             .company-tagline {
-//               font-size: 14px;
-//               color: #333333;
-//               margin: 4px 0;
-//               font-weight: 700;
-//               text-transform: uppercase;
-//               text-align: center;
-//             }
-//             .contact-info {
+            
+//             .company-brand {
 //               display: flex;
-//               justify-content: center;
-//               gap: 20px;
-//               margin-top: 6px;
-//               font-size: 12px;
-//               color: #666666;
-//               font-weight: 700;
+//               align-items: center;
+//               gap: 15px;
 //             }
-//             .header-section {
-//               display: flex;
-//               justify-content: space-between;
-//               align-items: flex-start;
-//               margin-bottom: 25px;
-//               padding: 15px;
-//               background: #f8f9fa;
+            
+//             .logo-placeholder {
+//               width: 60px;
+//               height: 60px;
+//               background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
 //               border-radius: 8px;
-//               border: 2px solid #e9ecef;
-//             }
-//             .invoice-title {
-//               font-size: 36px;
+//               display: flex;
+//               align-items: center;
+//               justify-content: center;
+//               color: white;
 //               font-weight: 900;
-//               color: #000000;
-//               margin: 0;
-//               text-transform: uppercase;
-//               letter-spacing: 2px;
+//               font-size: 18px;
 //             }
+            
+//             .company-info h1 {
+//               font-size: 24px;
+//               font-weight: 900;
+//               color: #1a1a1a;
+//               margin-bottom: 4px;
+//               letter-spacing: -0.5px;
+//             }
+            
+//             .company-info .tagline {
+//               font-size: 10px;
+//               font-weight: 600;
+//               color: #6b7280;
+//               text-transform: uppercase;
+//               letter-spacing: 1px;
+//               margin-bottom: 8px;
+//             }
+            
+//             .company-info .contact {
+//               font-size: 9px;
+//               color: #4b5563;
+//               font-weight: 500;
+//             }
+            
 //             .invoice-meta {
 //               text-align: right;
 //             }
-//             .invoice-number {
-//               font-size: 18px;
+            
+//             .invoice-title {
+//               font-size: 32px;
 //               font-weight: 900;
-//               color: #000000;
-//               margin-bottom: 8px;
+//               color: #1a1a1a;
+//               margin-bottom: 15px;
+//               text-transform: uppercase;
+//               letter-spacing: 2px;
 //             }
-//             .meta-item {
-//               font-size: 12px;
-//               color: #333333;
-//               margin: 3px 0;
+            
+//             .meta-box {
+//               background: #f9fafb;
+//               border: 1px solid #e5e7eb;
+//               border-radius: 6px;
+//               padding: 12px;
+//               min-width: 200px;
+//             }
+            
+//             .meta-row {
+//               display: flex;
+//               justify-content: space-between;
+//               margin-bottom: 6px;
+//               font-size: 9px;
+//             }
+            
+//             .meta-row:last-child {
+//               margin-bottom: 0;
+//             }
+            
+//             .meta-label {
+//               font-weight: 600;
+//               color: #6b7280;
+//             }
+            
+//             .meta-value {
 //               font-weight: 700;
+//               color: #1a1a1a;
 //             }
+            
+//             .status-badge {
+//               display: inline-block;
+//               padding: 4px 10px;
+//               border-radius: 20px;
+//               font-size: 8px;
+//               font-weight: 800;
+//               text-transform: uppercase;
+//               letter-spacing: 0.5px;
+//               margin-left: 8px;
+//             }
+            
+//             .status-draft { background: #e5e7eb; color: #374151; }
+//             .status-sent { background: #dbeafe; color: #1e40af; }
+//             .status-paid { background: #d1fae5; color: #065f46; }
+//             .status-overdue { background: #fee2e2; color: #991b1b; }
+//             .status-issued { background: #fed7aa; color: #92400e; }
+//             .status-received { background: #cffafe; color: #0e7490; }
+            
+//             /* Customer Section */
 //             .customer-section {
 //               display: grid;
 //               grid-template-columns: 1fr 1fr;
 //               gap: 25px;
-//               margin-bottom: 25px;
-//               padding: 15px;
-//               background: #f8f9fa;
-//               border-radius: 8px;
-//               border: 2px solid #e9ecef;
+//               margin-bottom: 30px;
 //             }
-//             .section-title {
-//               font-size: 14px;
-//               font-weight: 900;
-//               color: #000000;
+            
+//             .customer-box {
+//               background: #f9fafb;
+//               border: 1px solid #e5e7eb;
+//               border-radius: 6px;
+//               padding: 15px;
+//             }
+            
+//             .customer-box h3 {
+//               font-size: 11px;
+//               font-weight: 800;
+//               color: #1a1a1a;
 //               margin-bottom: 10px;
 //               text-transform: uppercase;
 //               letter-spacing: 1px;
 //             }
+            
 //             .customer-details p {
-//               margin: 4px 0;
-//               font-size: 13px;
-//               color: #000000;
-//               font-weight: 700;
+//               font-size: 10px;
+//               margin-bottom: 4px;
+//               color: #4b5563;
 //             }
+            
 //             .customer-details strong {
-//               font-weight: 900;
-//               color: #000000;
+//               color: #1a1a1a;
+//               font-weight: 600;
 //             }
-//             table {
-//               width: 100%;
-//               border-collapse: collapse;
-//               margin-bottom: 20px;
-//               border: 2px solid #000000;
+            
+//             /* Items Table */
+//             .items-section {
+//               margin-bottom: 25px;
 //             }
-//             thead {
-//               background: #000000;
-//               border-bottom: 3px solid #000000;
-//             }
-//             th {
-//               padding: 12px 10px;
-//               text-align: left;
+            
+//             .section-header {
 //               font-size: 12px;
-//               font-weight: 900;
-//               color: #ffffff;
+//               font-weight: 800;
+//               color: #1a1a1a;
+//               margin-bottom: 12px;
 //               text-transform: uppercase;
 //               letter-spacing: 1px;
-//               border-right: 1px solid #444444;
 //             }
-//             th:last-child {
-//               border-right: none;
+            
+//             table {
+//               width: 100%;
+//               border-collapse: separate;
+//               border-spacing: 0;
+//               margin-bottom: 20px;
 //             }
+            
+//             thead {
+//               background: #1a1a1a;
+//             }
+            
+//             th {
+//               padding: 10px 8px;
+//               text-align: left;
+//               font-size: 8px;
+//               font-weight: 800;
+//               color: #ffffff;
+//               text-transform: uppercase;
+//               letter-spacing: 0.5px;
+//               border-bottom: 2px solid #d97706;
+//             }
+            
+//             th.text-center { text-align: center; }
+//             th.text-right { text-align: right; }
+            
 //             td {
-//               padding: 12px 10px;
-//               border-bottom: 2px solid #e9ecef;
-//               font-size: 13px;
-//               color: #000000;
+//               padding: 10px 8px;
+//               border-bottom: 1px solid #e5e7eb;
+//               font-size: 9px;
+//               color: #1a1a1a;
+//               font-weight: 500;
+//             }
+            
+//             td.text-center { text-align: center; }
+//             td.text-right { text-align: right; }
+            
+//             .item-desc {
+//               font-weight: 600;
+//             }
+            
+//             .amount {
 //               font-weight: 700;
-//               border-right: 1px solid #e9ecef;
+//               color: #1a1a1a;
 //             }
-//             td:last-child {
-//               border-right: none;
-//             }
-//             .text-right {
-//               text-align: right;
-//             }
-//             .text-center {
-//               text-align: center;
-//             }
+            
+//             /* Totals Section */
 //             .totals-section {
-//               margin-left: auto;
-//               width: 300px;
-//               background: #000000;
-//               padding: 20px;
-//               border-radius: 8px;
-//               border: 3px solid #b8860b;
+//               display: flex;
+//               justify-content: flex-end;
+//               margin-bottom: 25px;
 //             }
+            
+//             .totals-box {
+//               width: 280px;
+//               background: #f9fafb;
+//               border: 1px solid #e5e7eb;
+//               border-radius: 6px;
+//               padding: 15px;
+//             }
+            
 //             .total-row {
 //               display: flex;
 //               justify-content: space-between;
-//               padding: 8px 0;
-//               border-bottom: 2px solid #333333;
+//               margin-bottom: 8px;
+//               font-size: 10px;
 //             }
+            
+//             .total-row:last-child {
+//               margin-bottom: 0;
+//             }
+            
 //             .total-label {
-//               font-weight: 800;
-//               color: #ffffff;
-//               font-size: 14px;
-//               text-transform: uppercase;
+//               font-weight: 600;
+//               color: #6b7280;
 //             }
+            
 //             .total-value {
-//               font-weight: 900;
-//               color: #ffffff;
-//               font-size: 14px;
+//               font-weight: 700;
+//               color: #1a1a1a;
 //             }
-//             .grand-total {
-//               border-top: 3px solid #b8860b;
-//               border-bottom: none;
-//               font-size: 16px;
-//               padding-top: 12px;
-//               margin-top: 8px;
+            
+//             .total-row.grand-total {
+//               border-top: 2px solid #d97706;
+//               padding-top: 10px;
+//               margin-top: 10px;
 //             }
+            
 //             .grand-total .total-label,
 //             .grand-total .total-value {
-//               font-size: 16px;
+//               font-size: 12px;
 //               font-weight: 900;
+//               color: #1a1a1a;
 //             }
-//             .notes-section {
-//               margin-top: 20px;
-//               padding: 15px;
-//               background: #fff3cd;
-//               border: 2px solid #b8860b;
-//               border-radius: 6px;
-//             }
-//             .footer {
-//               margin-top: 30px;
-//               text-align: center;
-//               padding-top: 15px;
-//               border-top: 3px solid #b8860b;
-//               color: #000000;
-//               font-size: 11px;
-//               font-weight: 800;
-//             }
-//             .status-badge {
-//               display: inline-block;
-//               padding: 4px 12px;
-//               border-radius: 20px;
-//               font-size: 10px;
-//               font-weight: 900;
-//               text-transform: uppercase;
-//               letter-spacing: 1px;
-//             }
-//             .status-draft { background: #6c757d; color: #ffffff; }
-//             .status-sent { background: #007bff; color: #ffffff; }
-//             .status-paid { background: #28a745; color: #ffffff; }
-//             .status-overdue { background: #dc3545; color: #ffffff; }
-//             .status-issued { background: #fd7e14; color: #ffffff; }
-//             .status-received { background: #20c997; color: #ffffff; }
+            
 //             .currency {
-//               font-weight: 900;
-//               color: #b8860b;
-//               margin-left: 5px;
+//               color: #d97706;
+//               font-weight: 800;
+//               margin-left: 2px;
 //             }
+            
+//             /* Notes Section */
+//             .notes-section {
+//               background: #fffbeb;
+//               border: 1px solid #f59e0b;
+//               border-radius: 6px;
+//               padding: 12px;
+//               margin-bottom: 25px;
+//             }
+            
+//             .notes-section h4 {
+//               font-size: 10px;
+//               font-weight: 800;
+//               color: #92400e;
+//               margin-bottom: 6px;
+//               text-transform: uppercase;
+//               letter-spacing: 0.5px;
+//             }
+            
+//             .notes-section p {
+//               font-size: 9px;
+//               color: #78350f;
+//               font-weight: 500;
+//             }
+            
+//             /* Footer */
+//             .footer {
+//               text-align: center;
+//               padding-top: 20px;
+//               border-top: 2px solid #e5e7eb;
+//             }
+            
+//             .footer p {
+//               font-size: 8px;
+//               color: #6b7280;
+//               margin-bottom: 4px;
+//               font-weight: 500;
+//             }
+            
+//             .footer p:first-child {
+//               font-weight: 700;
+//               color: #4b5563;
+//               margin-bottom: 6px;
+//             }
+            
+//             /* Payment Terms */
+//             .payment-terms {
+//               background: #f3f4f6;
+//               border: 1px solid #d1d5db;
+//               border-radius: 6px;
+//               padding: 12px;
+//               margin-bottom: 20px;
+//             }
+            
+//             .payment-terms h4 {
+//               font-size: 10px;
+//               font-weight: 800;
+//               color: #1a1a1a;
+//               margin-bottom: 6px;
+//               text-transform: uppercase;
+//               letter-spacing: 0.5px;
+//             }
+            
+//             .payment-terms p {
+//               font-size: 8px;
+//               color: #4b5563;
+//               font-weight: 500;
+//             }
+            
+//             /* Print Styles */
 //             @media print {
-//               body { 
-//                 margin: 0; 
-//                 padding: 0;
-//                 background: white;
+//               body {
+//                 background: white !important;
 //               }
-//               .invoice-container { 
-//                 padding: 15mm;
-//                 margin: 0;
-//                 box-shadow: none;
+              
+//               .invoice-container {
+//                 padding: 15mm !important;
+//                 box-shadow: none !important;
+//               }
+              
+//               .no-print {
+//                 display: none !important;
+//               }
+//             }
+            
+//             /* Responsive for small screens */
+//             @media (max-width: 640px) {
+//               .invoice-container {
+//                 padding: 15px;
+//               }
+              
+//               .header {
+//                 grid-template-columns: 1fr;
+//                 gap: 20px;
+//               }
+              
+//               .invoice-meta {
+//                 text-align: left;
+//               }
+              
+//               .customer-section {
+//                 grid-template-columns: 1fr;
+//                 gap: 15px;
+//               }
+              
+//               .totals-section {
+//                 justify-content: stretch;
+//               }
+              
+//               .totals-box {
+//                 width: 100%;
 //               }
 //             }
 //           </style>
 //         </head>
 //         <body>
 //           <div class="invoice-container">
-//             <!-- Letterhead -->
-//             <div class="letterhead">
-//               <h1 class="company-name">BARKAT AL-KHAIR</h1>
-//               <p class="company-tagline">PREMIUM GOLD & JEWELRY TRADING</p>
-//               <div class="contact-info">
-//                 <span>KUWAIT CITY, SHARQ</span>
-//                 <span>TEL: 90947886, 99273356</span>
+//             <!-- Header -->
+//             <div class="header">
+//               <div class="company-brand">
+//                 <div class="logo-placeholder">BK</div>
+//                 <div class="company-info">
+//                   <h1>BARKAT AL-KHAIR</h1>
+//                   <p class="tagline">Premium Gold & Jewelry Trading</p>
+//                   <p class="contact">KUWAIT CITY, SHARQ • TEL: 90947886, 99273356</p>
+//                 </div>
 //               </div>
-//             </div>
-
-//             <!-- Header Section -->
-//             <div class="header-section">
-//               <h2 class="invoice-title">INVOICE</h2>
 //               <div class="invoice-meta">
-//                 <div class="invoice-number">INVOICE ${invoice.invoiceNumber}</div>
-//                 <div class="meta-item">DATE: ${formatDate(invoice.date)}</div>
-//                 <div class="meta-item">DUE DATE: ${formatDate(invoice.dueDate)}</div>
-//                 <div class="meta-item">
-//                   STATUS: <span class="status-badge status-${invoice.status}">
-//                     ${invoice.status.toUpperCase()}
-//                   </span>
+//                 <h2 class="invoice-title">Invoice</h2>
+//                 <div class="meta-box">
+//                   <div class="meta-row">
+//                     <span class="meta-label">Number:</span>
+//                     <span class="meta-value">${invoice.invoiceNumber}</span>
+//                   </div>
+//                   <div class="meta-row">
+//                     <span class="meta-label">Date:</span>
+//                     <span class="meta-value">${formatDate(invoice.date)}</span>
+//                   </div>
+//                   <div class="meta-row">
+//                     <span class="meta-label">Due Date:</span>
+//                     <span class="meta-value">${formatDate(invoice.dueDate)}</span>
+//                   </div>
+//                   <div class="meta-row">
+//                     <span class="meta-label">Status:</span>
+//                     <span class="meta-value">
+//                       ${invoice.status.toUpperCase()}
+//                       <span class="status-badge status-${invoice.status}">${invoice.status}</span>
+//                     </span>
+//                   </div>
 //                 </div>
 //               </div>
 //             </div>
 
 //             <!-- Customer Section -->
 //             <div class="customer-section">
-//               <div>
-//                 <div class="section-title">BILL TO</div>
+//               <div class="customer-box">
+//                 <h3>Bill To</h3>
 //                 <div class="customer-details">
 //                   <p><strong>${invoice.customerName || "Customer Name"}</strong></p>
 //                   <p>${invoice.customerAddress || "Customer Address"}</p>
 //                   <p>${invoice.customerPhone || "Phone Number"}</p>
 //                 </div>
 //               </div>
-//               <div>
-//                 <div class="section-title">FROM</div>
+//               <div class="customer-box">
+//                 <h3>From</h3>
 //                 <div class="customer-details">
 //                   <p><strong>BARKAT AL-KHAIR</strong></p>
 //                   <p>KUWAIT CITY, SHARQ</p>
 //                   <p>TEL: 90947886, 99273356</p>
+//                   <p>CR: 1234567890</p>
 //                 </div>
 //               </div>
 //             </div>
 
-//             <!-- Items Table -->
-//             <table>
-//               <thead>
-//                 <tr>
-//                   <th>DESCRIPTION</th>
-//                   <th class="text-center">QTY</th>
-//                   <th class="text-right">WEIGHT (g)</th>
-//                   <th class="text-right">PURITY</th>
-//                   <th class="text-right">RATE</th>
-//                   <th class="text-right">AMOUNT (KWD)</th>
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 ${tableRowsHTML}
-//               </tbody>
-//             </table>
+//             <!-- Items Section -->
+//             <div class="items-section">
+//               <h3 class="section-header">Invoice Items</h3>
+//               <table>
+//                 <thead>
+//                   <tr>
+//                     <th style="width: 35%">Description</th>
+//                     <th class="text-center" style="width: 8%">Qty</th>
+//                     <th class="text-right" style="width: 12%">Weight</th>
+//                     <th class="text-right" style="width: 10%">Purity</th>
+//                     <th class="text-right" style="width: 15%">Rate (KWD)</th>
+//                     <th class="text-right" style="width: 20%">Amount (KWD)</th>
+//                   </tr>
+//                 </thead>
+//                 <tbody>
+//                   ${tableRowsHTML}
+//                 </tbody>
+//               </table>
+//             </div>
+          
+//             <!-- Payment Terms -->
+//             <div class="payment-terms">
+//               <h4>Payment Terms</h4>
+//               <p>Payment is due within 7 days from invoice date. Late payments may incur a 2% monthly fee. All prices are in Kuwaiti Dinars (KWD).</p>
+//             </div>
 
-//             <!-- Totals Section -->
+//             <!-- Totals -->
 //             <div class="totals-section">
-//               <div class="total-row grand-total">
-//                 <span class="total-label">TOTAL AMOUNT</span>
-//                 <span class="total-value">${invoice.total.toLocaleString()}<span class="currency">KWD</span></span>
+//               <div class="totals-box">
+//                 <div class="total-row">
+//                   <span class="total-label">Subtotal</span>
+//                   <span class="total-value">${subtotal.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
+//                 </div>
+               
+//                 <div class="total-row grand-total">
+//                   <span class="total-label">Total Amount</span>
+//                   <span class="total-value">${grandTotal.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
+//                 </div>
 //               </div>
 //             </div>
 
-//             <!-- Notes Section -->
+//             <!-- Notes -->
 //             ${invoice.notes ? `
 //               <div class="notes-section">
-//                 <div class="section-title">NOTES</div>
-//                 <p><strong>${invoice.notes}</strong></p>
+//                 <h4>Notes</h4>
+//                 <p>${invoice.notes}</p>
 //               </div>
-//             ` : ''}
+//             ` : ""}
 
 //             <!-- Footer -->
 //             <div class="footer">
-//               <p><strong>THANK YOU FOR YOUR BUSINESS WITH BARKAT AL-KHAIR</strong></p>
-//               <p><strong>THIS IS A COMPUTER-GENERATED INVOICE AND DOES NOT REQUIRE A SIGNATURE</strong></p>
+//               <p>Thank you for your business with Barkat Al-Khair</p>
+//               <p>This is a computer-generated invoice and does not require a signature</p>
+//               <p>For inquiries, please contact us at 90947886, 99273356</p>
 //             </div>
 //           </div>
 
 //           <script>
-//             // Auto-print and close after printing
 //             window.onload = function() {
 //               setTimeout(function() {
 //                 window.print();
-//               }, 500);
+//               }, 300);
               
-//               // Close window after print
 //               window.onafterprint = function() {
 //                 setTimeout(function() {
 //                   window.close();
@@ -586,48 +788,37 @@
 //             };
 //           </script>
 //         </body>
-//       </html>
-//     `;
+//         </html>
+//       `;
 
 //     printWindow.document.write(htmlContent);
 //     printWindow.document.close();
-    
 //     toast.success("PDF download initiated! Check your print dialog.");
 //   };
 
-//   const getStatusBadgeClass = (status: string) => {
-//     switch (status) {
-//       case 'draft': return 'status-draft';
-//       case 'sent': return 'status-sent';
-//       case 'paid': return 'status-paid';
-//       case 'overdue': return 'status-overdue';
-//       case 'issued': return 'status-issued';
-//       case 'received': return 'status-received';
-//       default: return 'status-draft';
-//     }
-//   };
-
 //   return (
-//     <div className="p-3 md:p-6 space-y-4 md:space-y-6">
+//     <div className="space-y-6 p-4 md:p-6">
 //       {/* Header - Mobile Optimized */}
 //       <motion.div
 //         initial={{ opacity: 0, y: -20 }}
 //         animate={{ opacity: 1, y: 0 }}
 //         className="flex flex-col gap-4"
 //       >
-//         <div className="text-center md:text-left">
-//           <h1 className="text-xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">Invoices</h1>
-//           <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 mt-1">
+//         <div>
+//           <h1 className="text-2xl md:text-3xl font-bold dark:text-slate-100">
+//             Invoices
+//           </h1>
+//           <p className="text-sm text-slate-600 dark:text-slate-400">
 //             Create and manage customer invoices
 //           </p>
 //         </div>
-        
+
 //         {/* Action Buttons - Stack on mobile */}
 //         <div className="flex flex-col sm:flex-row gap-2 w-full">
 //           <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-//             <Button 
-//               variant="outline" 
-//               onClick={handleDuplicateInvoice} 
+//             <Button
+//               variant="outline"
+//               onClick={handleDuplicateInvoice}
 //               className="gap-2 flex-1 sm:flex-none"
 //               size="sm"
 //             >
@@ -635,16 +826,16 @@
 //               <span className="hidden sm:inline">Duplicate</span>
 //               <span className="sm:hidden">Copy</span>
 //             </Button>
-//             <Button 
-//               onClick={handleSaveInvoice} 
+//             <Button
+//               onClick={handleSaveInvoice}
 //               className="gap-2 flex-1 sm:flex-none"
 //               size="sm"
 //             >
 //               <Save className="w-3 h-3 md:w-4 md:h-4" />
 //               Save
 //             </Button>
-//             <Button 
-//               onClick={handleDownloadPDF} 
+//             <Button
+//               onClick={handleDownloadPDF}
 //               className="gap-2 flex-1 sm:flex-none bg-green-600 hover:bg-green-700"
 //               size="sm"
 //             >
@@ -662,13 +853,19 @@
 //           {/* Invoice Header */}
 //           <Card className="dark:bg-slate-900 dark:border-slate-800">
 //             <CardHeader className="pb-3">
-//               <CardTitle className="text-lg md:text-xl dark:text-slate-100">Invoice Details</CardTitle>
-//               <CardDescription className="dark:text-slate-400">Basic invoice information</CardDescription>
+//               <CardTitle className="text-lg md:text-xl dark:text-slate-100">
+//                 Invoice Details
+//               </CardTitle>
+//               <CardDescription className="dark:text-slate-400">
+//                 Basic invoice information
+//               </CardDescription>
 //             </CardHeader>
 //             <CardContent className="space-y-3">
 //               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 //                 <div className="space-y-2">
-//                   <Label htmlFor="invoiceNumber" className="text-sm">Invoice Number</Label>
+//                   <Label htmlFor="invoiceNumber" className="text-sm">
+//                     Invoice Number
+//                   </Label>
 //                   <Input
 //                     id="invoiceNumber"
 //                     value={invoice.invoiceNumber}
@@ -677,12 +874,20 @@
 //                   />
 //                 </div>
 //                 <div className="space-y-2">
-//                   <Label htmlFor="status" className="text-sm">Status</Label>
+//                   <Label htmlFor="status" className="text-sm">
+//                     Status
+//                   </Label>
 //                   <Select
 //                     value={invoice.status}
-//                     onValueChange={(value: "draft" | "sent" | "paid" | "overdue" | "issued" | "received") =>
-//                       handleInputChange("status", value)
-//                     }
+//                     onValueChange={(
+//                       value:
+//                         | "draft"
+//                         | "sent"
+//                         | "paid"
+//                         | "overdue"
+//                         | "issued"
+//                         | "received"
+//                     ) => handleInputChange("status", value)}
 //                   >
 //                     <SelectTrigger className="text-sm">
 //                       <SelectValue />
@@ -698,7 +903,9 @@
 //                   </Select>
 //                 </div>
 //                 <div className="space-y-2">
-//                   <Label htmlFor="date" className="text-sm">Invoice Date</Label>
+//                   <Label htmlFor="date" className="text-sm">
+//                     Invoice Date
+//                   </Label>
 //                   <Input
 //                     id="date"
 //                     type="date"
@@ -708,7 +915,9 @@
 //                   />
 //                 </div>
 //                 <div className="space-y-2">
-//                   <Label htmlFor="dueDate" className="text-sm">Due Date</Label>
+//                   <Label htmlFor="dueDate" className="text-sm">
+//                     Due Date
+//                   </Label>
 //                   <Input
 //                     id="dueDate"
 //                     type="date"
@@ -724,12 +933,18 @@
 //           {/* Customer Information */}
 //           <Card className="dark:bg-slate-900 dark:border-slate-800">
 //             <CardHeader className="pb-3">
-//               <CardTitle className="text-lg md:text-xl dark:text-slate-100">Customer Information</CardTitle>
-//               <CardDescription className="dark:text-slate-400">Bill to details</CardDescription>
+//               <CardTitle className="text-lg md:text-xl dark:text-slate-100">
+//                 Customer Information
+//               </CardTitle>
+//               <CardDescription className="dark:text-slate-400">
+//                 Bill to details
+//               </CardDescription>
 //             </CardHeader>
 //             <CardContent className="space-y-3">
 //               <div className="space-y-2">
-//                 <Label htmlFor="customerName" className="text-sm">Customer Name</Label>
+//                 <Label htmlFor="customerName" className="text-sm">
+//                   Customer Name
+//                 </Label>
 //                 <Input
 //                   id="customerName"
 //                   value={invoice.customerName}
@@ -739,7 +954,9 @@
 //                 />
 //               </div>
 //               <div className="space-y-2">
-//                 <Label htmlFor="customerAddress" className="text-sm">Address</Label>
+//                 <Label htmlFor="customerAddress" className="text-sm">
+//                   Address
+//                 </Label>
 //                 <Input
 //                   id="customerAddress"
 //                   value={invoice.customerAddress}
@@ -749,7 +966,9 @@
 //                 />
 //               </div>
 //               <div className="space-y-2">
-//                 <Label htmlFor="customerPhone" className="text-sm">Phone Number</Label>
+//                 <Label htmlFor="customerPhone" className="text-sm">
+//                   Phone Number
+//                 </Label>
 //                 <Input
 //                   id="customerPhone"
 //                   value={invoice.customerPhone}
@@ -765,8 +984,12 @@
 //           <Card className="dark:bg-slate-900 dark:border-slate-800">
 //             <CardHeader className="flex flex-row items-center justify-between pb-3">
 //               <div>
-//                 <CardTitle className="text-lg md:text-xl dark:text-slate-100">Invoice Items</CardTitle>
-//                 <CardDescription className="dark:text-slate-400">Products and services</CardDescription>
+//                 <CardTitle className="text-lg md:text-xl dark:text-slate-100">
+//                   Invoice Items
+//                 </CardTitle>
+//                 <CardDescription className="dark:text-slate-400">
+//                   Products and services
+//                 </CardDescription>
 //               </div>
 //               <Button onClick={addNewItem} size="sm" className="gap-1 md:gap-2">
 //                 <Plus className="w-3 h-3 md:w-4 md:h-4" />
@@ -776,13 +999,15 @@
 //             </CardHeader>
 //             <CardContent>
 //               <div className="space-y-3">
-//                 {invoice.items.map((item, index) => (
+//                 {invoice.items.map((item) => (
 //                   <div
 //                     key={item.id}
 //                     className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-start p-3 border rounded-lg dark:border-slate-700"
 //                   >
 //                     <div className="sm:col-span-12 md:col-span-4 space-y-2">
-//                       <Label htmlFor={`item-desc-${item.id}`} className="text-xs">Description</Label>
+//                       <Label htmlFor={`item-desc-${item.id}`} className="text-xs">
+//                         Description
+//                       </Label>
 //                       <Input
 //                         id={`item-desc-${item.id}`}
 //                         value={item.description}
@@ -795,51 +1020,75 @@
 //                     </div>
 //                     <div className="grid grid-cols-4 sm:grid-cols-12 gap-2 sm:col-span-12 md:col-span-8">
 //                       <div className="sm:col-span-3 space-y-2">
-//                         <Label htmlFor={`item-qty-${item.id}`} className="text-xs">Qty</Label>
+//                         <Label htmlFor={`item-qty-${item.id}`} className="text-xs">
+//                           Qty
+//                         </Label>
 //                         <Input
 //                           id={`item-qty-${item.id}`}
 //                           type="number"
 //                           value={item.quantity}
 //                           onChange={(e) =>
-//                             handleItemChange(item.id, "quantity", parseFloat(e.target.value) || 0)
+//                             handleItemChange(
+//                               item.id,
+//                               "quantity",
+//                               parseFloat(e.target.value) || 0
+//                             )
 //                           }
 //                           className="text-sm"
 //                         />
 //                       </div>
 //                       <div className="sm:col-span-3 space-y-2">
-//                         <Label htmlFor={`item-weight-${item.id}`} className="text-xs">Weight (g)</Label>
+//                         <Label htmlFor={`item-weight-${item.id}`} className="text-xs">
+//                           Weight (g)
+//                         </Label>
 //                         <Input
 //                           id={`item-weight-${item.id}`}
 //                           type="number"
 //                           step="0.001"
 //                           value={item.weight}
 //                           onChange={(e) =>
-//                             handleItemChange(item.id, "weight", parseFloat(e.target.value) || 0)
+//                             handleItemChange(
+//                               item.id,
+//                               "weight",
+//                               parseFloat(e.target.value) || 0
+//                             )
 //                           }
 //                           placeholder="0.000"
 //                           className="text-sm"
 //                         />
 //                       </div>
 //                       <div className="sm:col-span-3 space-y-2">
-//                         <Label htmlFor={`item-purity-${item.id}`} className="text-xs">Purity</Label>
+//                         <Label htmlFor={`item-purity-${item.id}`} className="text-xs">
+//                           Purity
+//                         </Label>
 //                         <Input
 //                           id={`item-purity-${item.id}`}
 //                           type="number"
 //                           value={item.purity}
 //                           onChange={(e) =>
-//                             handleItemChange(item.id, "purity", parseFloat(e.target.value) || 0)
+//                             handleItemChange(
+//                               item.id,
+//                               "purity",
+//                               parseFloat(e.target.value) || 0
+//                             )
 //                           }
 //                           className="text-sm"
 //                         />
 //                       </div>
 //                       <div className="sm:col-span-3 space-y-2">
-//                         <Label htmlFor={`item-rate-${item.id}`} className="text-xs">Rate</Label>
+//                         <Label htmlFor={`item-rate-${item.id}`} className="text-xs">
+//                           Rate
+//                         </Label>
 //                         <Input
 //                           id={`item-rate-${item.id}`}
 //                           type="number"
 //                           value={item.rate}
 //                           onChange={(e) =>
-//                             handleItemChange(item.id, "rate", parseFloat(e.target.value) || 0)
+//                             handleItemChange(
+//                               item.id,
+//                               "rate",
+//                               parseFloat(e.target.value) || 0
+//                             )
 //                           }
 //                           placeholder="0.00"
 //                           className="text-sm"
@@ -851,7 +1100,11 @@
 //                           <Input
 //                             value={item.amount}
 //                             onChange={(e) =>
-//                               handleItemChange(item.id, "amount", parseFloat(e.target.value) || 0)
+//                               handleItemChange(
+//                                 item.id,
+//                                 "amount",
+//                                 parseFloat(e.target.value) || 0
+//                               )
 //                             }
 //                             type="number"
 //                             className="font-medium text-sm"
@@ -878,8 +1131,12 @@
 //           {/* Notes */}
 //           <Card className="dark:bg-slate-900 dark:border-slate-800">
 //             <CardHeader className="pb-3">
-//               <CardTitle className="text-lg md:text-xl dark:text-slate-100">Notes</CardTitle>
-//               <CardDescription className="dark:text-slate-400">Additional information</CardDescription>
+//               <CardTitle className="text-lg md:text-xl dark:text-slate-100">
+//                 Notes
+//               </CardTitle>
+//               <CardDescription className="dark:text-slate-400">
+//                 Additional information
+//               </CardDescription>
 //             </CardHeader>
 //             <CardContent>
 //               <Input
@@ -901,21 +1158,33 @@
 //             onClick={() => setIsPreviewOpen(!isPreviewOpen)}
 //           >
 //             <span>Preview & Totals</span>
-//             {isPreviewOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+//             {isPreviewOpen ? (
+//               <ChevronUp className="w-4 h-4" />
+//             ) : (
+//               <ChevronDown className="w-4 h-4" />
+//             )}
 //           </Button>
 
-//           <div className={`space-y-4 md:space-y-6 ${isPreviewOpen ? 'block' : 'hidden lg:block'}`}>
+//           <div className={`space-y-4 md:space-y-6 ${isPreviewOpen ? "block" : "hidden lg:block"}`}>
 //             {/* Invoice Preview */}
 //             <Card className="dark:bg-slate-900 dark:border-slate-800">
 //               <CardHeader className="pb-3">
-//                 <CardTitle className="text-lg dark:text-slate-100">Invoice Preview</CardTitle>
-//                 <CardDescription className="dark:text-slate-400">Real-time preview</CardDescription>
+//                 <CardTitle className="text-lg dark:text-slate-100">
+//                   Invoice Preview
+//                 </CardTitle>
+//                 <CardDescription className="dark:text-slate-400">
+//                   Real-time preview
+//                 </CardDescription>
 //               </CardHeader>
 //               <CardContent>
 //                 <div className="border rounded-lg p-3 bg-slate-50 dark:bg-slate-800 dark:border-slate-700">
 //                   <div className="text-center mb-3">
-//                     <h3 className="font-bold text-base md:text-lg dark:text-slate-100">BARKAT AL-KHAIR</h3>
-//                     <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">Invoice #{invoice.invoiceNumber}</p>
+//                     <h3 className="font-bold text-base md:text-lg dark:text-slate-100">
+//                       BARKAT AL-KHAIR
+//                     </h3>
+//                     <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">
+//                       Invoice #{invoice.invoiceNumber}
+//                     </p>
 //                   </div>
 //                   <div className="text-xs space-y-1 dark:text-slate-300">
 //                     <p>
@@ -931,8 +1200,8 @@
 //                           invoice.status === "paid"
 //                             ? "default"
 //                             : invoice.status === "overdue"
-//                             ? "destructive"
-//                             : "outline"
+//                               ? "destructive"
+//                               : "outline"
 //                         }
 //                         className="text-xs"
 //                       >
@@ -947,7 +1216,9 @@
 //             {/* Totals */}
 //             <Card className="dark:bg-slate-900 dark:border-slate-800">
 //               <CardHeader className="pb-3">
-//                 <CardTitle className="text-lg dark:text-slate-100">Invoice Totals</CardTitle>
+//                 <CardTitle className="text-lg dark:text-slate-100">
+//                   Invoice Totals
+//                 </CardTitle>
 //               </CardHeader>
 //               <CardContent className="space-y-3">
 //                 <div className="flex justify-between border-t pt-2 dark:border-slate-700">
@@ -965,18 +1236,29 @@
 //             {/* Quick Actions */}
 //             <Card className="dark:bg-slate-900 dark:border-slate-800">
 //               <CardHeader className="pb-3">
-//                 <CardTitle className="text-lg dark:text-slate-100">Quick Actions</CardTitle>
+//                 <CardTitle className="text-lg dark:text-slate-100">
+//                   Quick Actions
+//                 </CardTitle>
 //               </CardHeader>
 //               <CardContent className="space-y-2">
-//                 <Button variant="outline" className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm">
+//                 <Button
+//                   variant="outline"
+//                   className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm"
+//                 >
 //                   <FileText className="w-3 h-3 md:w-4 md:h-4" />
 //                   New Invoice
 //                 </Button>
-//                 <Button variant="outline" className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm">
+//                 <Button
+//                   variant="outline"
+//                   className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm"
+//                 >
 //                   <User className="w-3 h-3 md:w-4 md:h-4" />
 //                   Add Customer
 //                 </Button>
-//                 <Button variant="outline" className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm">
+//                 <Button
+//                   variant="outline"
+//                   className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm"
+//                 >
 //                   <Calendar className="w-3 h-3 md:w-4 md:h-4" />
 //                   Schedule Reminder
 //                 </Button>
@@ -986,8 +1268,11 @@
 //         </div>
 //       </div>
 //     </div>
+
 //   );
 // }
+
+
 
 
 
@@ -1225,12 +1510,6 @@ export default function InvoicePage() {
     `
       )
       .join("");
-
-    // Calculate tax (example: 5% VAT)
-    const taxRate = 0.05;
-    const subtotal = invoice.total;
-    const taxAmount = subtotal * taxRate;
-    const grandTotal = subtotal + taxAmount;
 
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
@@ -1725,7 +2004,7 @@ export default function InvoicePage() {
                 </tbody>
               </table>
             </div>
-
+          
             <!-- Payment Terms -->
             <div class="payment-terms">
               <h4>Payment Terms</h4>
@@ -1735,17 +2014,9 @@ export default function InvoicePage() {
             <!-- Totals -->
             <div class="totals-section">
               <div class="totals-box">
-                <div class="total-row">
-                  <span class="total-label">Subtotal</span>
-                  <span class="total-value">${subtotal.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
-                </div>
-                <div class="total-row">
-                  <span class="total-label">VAT (5%)</span>
-                  <span class="total-value">${taxAmount.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
-                </div>
                 <div class="total-row grand-total">
                   <span class="total-label">Total Amount</span>
-                  <span class="total-value">${grandTotal.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
+                  <span class="total-value">${invoice.total.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
                 </div>
               </div>
             </div>
@@ -1977,11 +2248,11 @@ export default function InvoicePage() {
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <div>
                 <CardTitle className="text-lg md:text-xl dark:text-slate-100">
-                Invoice Items
-              </CardTitle>
-              <CardDescription className="dark:text-slate-400">
-                Products and services
-              </CardDescription>
+                  Invoice Items
+                </CardTitle>
+                <CardDescription className="dark:text-slate-400">
+                  Products and services
+                </CardDescription>
               </div>
               <Button onClick={addNewItem} size="sm" className="gap-1 md:gap-2">
                 <Plus className="w-3 h-3 md:w-4 md:h-4" />
@@ -2192,8 +2463,8 @@ export default function InvoicePage() {
                           invoice.status === "paid"
                             ? "default"
                             : invoice.status === "overdue"
-                            ? "destructive"
-                            : "outline"
+                              ? "destructive"
+                              : "outline"
                         }
                         className="text-xs"
                       >
@@ -2233,37 +2504,32 @@ export default function InvoicePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm"
-                  >
-                    <FileText className="w-3 h-3 md:w-4 md:h-4" />
-                    New Invoice
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm"
-                  >
-                    <User className="w-3 h-3 md:w-4 md:h-4" />
-                    Add Customer
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm"
-                  >
-                    <Calendar className="w-3 h-3 md:w-4 md:h-4" />
-                    Schedule Reminder
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm"
+                >
+                  <FileText className="w-3 h-3 md:w-4 md:h-4" />
+                  New Invoice
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm"
+                >
+                  <User className="w-3 h-3 md:w-4 md:h-4" />
+                  Add Customer
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2 dark:border-slate-700 dark:text-slate-300 text-sm"
+                >
+                  <Calendar className="w-3 h-3 md:w-4 md:h-4" />
+                  Schedule Reminder
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
-    
+    </div>
   );
 }
-
-
-
-
