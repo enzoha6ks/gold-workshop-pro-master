@@ -1274,8 +1274,6 @@
 
 
 
-
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -1448,6 +1446,20 @@ export default function InvoicePage() {
     toast.success("Totals recalculated!");
   };
 
+  // Auto-recalculate totals when items change
+  useState(() => {
+    const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
+    const total = subtotal;
+    
+    if (invoice.subtotal !== subtotal || invoice.total !== total) {
+      setInvoice(prev => ({
+        ...prev,
+        subtotal,
+        total,
+      }));
+    }
+  });
+
   // Save invoice
   const handleSaveInvoice = () => {
     recalculateTotals();
@@ -1490,6 +1502,10 @@ export default function InvoicePage() {
       toast.error("Please fill all item descriptions before downloading PDF");
       return;
     }
+
+    // Recalculate totals before generating PDF
+    const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
+    const total = subtotal;
 
     // Generate table rows
     const tableRowsHTML = invoice.items
@@ -2016,7 +2032,7 @@ export default function InvoicePage() {
               <div class="totals-box">
                 <div class="total-row grand-total">
                   <span class="total-label">Total Amount</span>
-                  <span class="total-value">${invoice.total.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
+                  <span class="total-value">${total.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
                 </div>
               </div>
             </div>
@@ -2470,6 +2486,9 @@ export default function InvoicePage() {
                       >
                         {invoice.status.toUpperCase()}
                       </Badge>
+                    </p>
+                    <p>
+                      <strong>Total Amount:</strong> {invoice.total.toLocaleString()} KWD
                     </p>
                   </div>
                 </div>
