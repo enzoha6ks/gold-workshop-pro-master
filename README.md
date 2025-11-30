@@ -1,6 +1,6 @@
-# 🏆 Gold Workshop Pro
+# Gold Workshop Pro 🏆
 
-A modern, feature-rich web application for comprehensive gold business management. Track melting processes, inventory, market transactions, orders, and generate detailed reports—all in one unified platform.
+A comprehensive web application for managing gold business operations including inventory tracking, melting processes, market transactions, order management, and detailed reporting.
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.1.0-blue?style=flat-square&logo=react)](https://react.dev/)
@@ -10,148 +10,83 @@ A modern, feature-rich web application for comprehensive gold business managemen
 
 ---
 
-## 📋 Table of Contents
-
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Quick Start](#-quick-start)
-- [Project Structure](#-project-structure)
-- [Features in Detail](#-features-in-detail)
-- [Component Architecture](#-component-architecture)
-- [Usage Examples](#-usage-examples)
-- [Configuration](#-configuration)
-- [Scripts](#-scripts)
-- [Contributing](#-contributing)
-- [License](#-license)
-
----
-
 ## ✨ Features
 
-### 🏠 **Dashboard**
-- Centralized statistics overview
-- Key metrics at a glance
-- Quick navigation to all modules
+### Core Modules (8 Pages)
+- **📊 Dashboard** - Real-time statistics and quick access
+- **🔐 Gold Safe** - Complete inventory management
+- **🔥 Melting** - Process tracking and efficiency monitoring
+- **📈 Market** - Buy/sell transactions with market rates
+- **📦 Orders** - Full order lifecycle management
+- **📉 Reports** - Advanced analytics and visualization
+- **🧾 Invoice** - Professional invoice generation with PDF export
+- **⚙️ Settings** - Configuration and worker management
 
-### 💰 **Gold Safe Management**
-- Real-time inventory tracking
-- Issue/return gold operations
-- Purity level management
-- Comprehensive transaction history
-- Multi-format export
-
-### 🔥 **Melting Process**
-- Batch tracking and management
-- Efficiency metrics calculation
-- Purity conversion calculator
-- Loss analysis and trends
-- Historical data preservation
-
-### 📊 **Market Transactions**
-- Buy/sell operations
-- Real-time market rate tracking
-- Receive/send transaction management
-- Transaction history with details
-- Financial analytics
-
-### 📦 **Order Management**
-- Create and manage orders
-- Update order status
-- View detailed order information
-- Track order history
-- Order timeline
-
-### 📈 **Reports & Analytics**
-- Financial performance reports
-- Trend analysis
-- Custom date ranges
-- Data visualization with charts
-- Export to multiple formats
-
-### 📄 **Invoice Management**
-- Generate professional invoices
-- Customizable templates
-- Print and PDF export
-- Invoice history tracking
-- Payment tracking
-
-### 👥 **Worker Management**
-- Employee records
-- Role-based access
-- Activity tracking
-- Performance metrics
-
-### ⚙️ **Settings**
-- Application preferences
-- Theme customization
-- Data management
-- System configuration
+### Key Features
+✅ Real-time data persistence with LocalStorage  
+✅ Responsive design for desktop and mobile  
+✅ Dark mode support  
+✅ PDF generation and printing  
+✅ Data visualization with charts  
+✅ Form validation and error handling  
+✅ 100% TypeScript type safety  
+✅ WCAG compliant accessible UI  
 
 ---
 
-## 🛠️ Tech Stack
-
-### Frontend
-- **Next.js 15.5.4** - React framework with App Router & Turbopack
-- **React 19.1.0** - UI library
-- **TypeScript 5** - Static typing
-
-### UI & Styling
-- **Tailwind CSS 4** - Utility-first CSS framework
-- **Radix UI** - Headless components
-- **Framer Motion** - Smooth animations
-- **Lucide React** - Beautiful icons
-
-### State Management
-- **Zustand 5.0.8** - Lightweight state store
-- **Next-Themes** - Theme management
-
-### Data & Utils
-- **React Hook Form** - Form handling
-- **Date-FNS** - Date utilities
-- **Recharts** - Charts & graphs
-- **UUID** - Unique identifiers
-
-### Export & Reporting
-- **jsPDF** - PDF generation
-- **html2canvas** - Screenshot capture
-- **React-to-Print** - Print functionality
-
-### Notifications
-- **Sonner** - Toast notifications
-
----
-
-## 🚀 Quick Start
+## 📦 Installation
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18 or higher
 - npm or yarn package manager
+- Git
 
-### Installation
-
+### Step 1: Clone Repository
 ```bash
-# Clone the repository
 git clone https://github.com/enzoha6ks/gold-workshop-pro-master.git
-cd gold-workshop-pro-master-main
+cd gold-workshop-pro-master
+```
 
-# Install dependencies
+### Step 2: Install Dependencies
+```bash
 npm install
+```
 
-# Start development server
+### Step 3: Start Development Server
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Application will be available at: **http://localhost:3000**
 
-### Build for Production
+---
+
+## 🚀 Getting Started
+
+### Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server with hot reload |
+| `npm run build` | Create optimized production build |
+| `npm start` | Start production server |
+| `npm run lint` | Run ESLint code quality check |
+
+### Quick Setup (60 seconds)
 
 ```bash
-# Build the application
-npm run build
+# 1. Clone
+git clone https://github.com/enzoha6ks/gold-workshop-pro-master.git
 
-# Start production server
-npm start
+# 2. Install
+cd gold-workshop-pro-master
+npm install
+
+# 3. Run
+npm run dev
+
+# 4. Open browser
+# http://localhost:3000
 ```
 
 ---
@@ -159,400 +94,321 @@ npm start
 ## 📁 Project Structure
 
 ```
-gold-workshop-pro/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── layout.tsx          # Root layout
-│   │   ├── page.tsx            # Dashboard
-│   │   ├── gold-safe/          # Gold inventory management
-│   │   ├── melting/            # Melting process tracking
-│   │   ├── market/             # Market transactions
-│   │   ├── orders/             # Order management
-│   │   ├── reports/            # Reports & analytics
-│   │   ├── Invoice/            # Invoice generation
-│   │   ├── workers/            # Worker management
-│   │   └── settings/           # Settings page
-│   │
-│   ├── components/             # Reusable components
-│   │   ├── ui/                 # UI component library
-│   │   ├── layout/             # Layout components
-│   │   ├── dashboard/          # Dashboard components
-│   │   ├── gold/               # Gold management components
-│   │   ├── market/             # Market components
-│   │   └── orders/             # Order components
-│   │
-│   ├── lib/                    # Utilities & helpers
-│   │   ├── store.ts            # Zustand store
-│   │   ├── utils.ts            # General utilities
-│   │   ├── storage.ts          # LocalStorage helpers
-│   │   └── gold-calculations.ts # Calculation utilities
-│   │
-│   └── contexts/               # React contexts
-│       └── theme-provider.tsx  # Theme management
+src/
+├── app/                          # 8 Main Feature Pages
+│   ├── layout.tsx               # Root layout
+│   ├── page.tsx                 # Dashboard
+│   ├── gold-safe/page.tsx       # Inventory
+│   ├── melting/page.tsx         # Melting process
+│   ├── market/page.tsx          # Market transactions
+│   ├── orders/page.tsx          # Orders
+│   ├── reports/page.tsx         # Reports & analytics
+│   ├── Invoice/page.tsx         # Invoice generation
+│   ├── settings/page.tsx        # Configuration
+│   └── globals.css              # Global styles
 │
-├── public/                     # Static assets
-├── package.json                # Dependencies
-├── tsconfig.json               # TypeScript config
-├── tailwind.config.js          # Tailwind config
-├── next.config.ts              # Next.js config
-└── README.md                   # This file
+├── components/                   # 30+ Reusable Components
+│   ├── ui/                      # 18 Base UI Components
+│   ├── layout/                  # Header, Sidebar, Mobile Nav
+│   ├── gold/                    # Gold management components
+│   ├── market/                  # Market components
+│   ├── orders/                  # Order components
+│   └── dashboard/               # Dashboard components
+│
+├── lib/                         # Utility Functions
+│   ├── store.ts                 # Zustand state management
+│   ├── storage.ts               # LocalStorage helpers
+│   ├── utils.ts                 # General utilities
+│   └── gold-calculations.ts     # Gold calculations
+│
+└── contexts/                    # React Contexts
+    └── theme-provider.tsx       # Dark mode provider
 ```
 
 ---
 
-## 🎯 Features in Detail
+## 🛠️ Tech Stack
 
-### 💰 Gold Safe Management
-Manage your gold inventory with precision:
-- Track stock by purity level
-- Record issue and return transactions
-- Monitor inventory changes
-- View transaction history
-- Export transaction reports
+### Core Framework
+- **Next.js 15.5.4** - React framework with App Router & Turbopack
+- **React 19.1.0** - UI library
+- **TypeScript 5** - Full type safety
 
-### 🔥 Melting Process
-Optimize your melting operations:
-- Create and track melting batches
-- Calculate efficiency metrics
-- Convert between purity levels
-- Monitor loss percentages
-- Analyze trends over time
-- Purity conversion calculator with alloy requirements
+### UI & Styling
+- **Tailwind CSS 4** - Utility-first CSS framework
+- **Radix UI** - Accessible component primitives
+- **Framer Motion 12.23.22** - Smooth animations
+- **Lucide React 0.545.0** - Icon library
+- **Next Themes** - Dark mode support
 
-### 📊 Market Transactions
-Handle market operations efficiently:
-- Record buy/sell transactions
-- Track market rates
+### State & Data
+- **Zustand 5.0.8** - Lightweight state management
+- **LocalStorage** - Browser data persistence
+- **React Hook Form** - Form handling
+- **Date-FNS** - Date utilities
+- **UUID 13.0.0** - Unique ID generation
+
+### Reporting & Export
+- **Recharts 3.2.1** - Data visualization
+- **jsPDF 3.0.3** - PDF generation
+- **html2canvas 1.4.1** - Canvas rendering
+- **React-to-Print 3.2.0** - Print functionality
+
+### Development Tools
+- **ESLint 9** - Code linting
+- **Turbopack** - Fast bundler
+
+---
+
+## 🎯 Key Modules
+
+### 1. Dashboard
+Main hub with real-time statistics and quick metrics overview.
+
+### 2. Gold Safe
+Complete inventory management:
+- View stock by purity
+- Issue/return transactions
+- Update stock purity
+- Transaction history
+
+### 3. Melting
+Process tracking for gold melting:
+- Batch tracking
+- Efficiency monitoring
+- Purity conversion calculator
+- Cost calculations
+
+### 4. Market
+Buy/sell transaction management:
 - Send/receive operations
-- View transaction details
-- Financial analytics
+- Real-time rates
+- Transaction details
+- Historical data
 
-### 📦 Order Management
-Manage orders seamlessly:
-- Create new orders
-- Update order status
-- Track order timeline
-- View order details
-- Order history
+### 5. Orders
+Order lifecycle management:
+- Create orders
+- Track status
+- Update details
+- View history
 
-### 📈 Analytics & Reports
-Generate insightful reports:
+### 6. Reports
+Advanced analytics:
+- Charts and graphs
+- Trend analysis
 - Performance metrics
-- Financial summaries
-- Trend charts
-- Custom date ranges
-- Export capabilities
+- Export reports
 
-### 📄 Invoice Management
-Professional invoice creation:
-- Auto-generated invoice numbers
-- Custom templates
-- Print-ready format
+### 7. Invoice
+Professional invoice generation:
+- Auto-generated numbers
 - PDF export
+- Print-ready format
 - Invoice tracking
+
+### 8. Settings
+Configuration management:
+- App preferences
+- Worker management
+- Theme settings
+- Data management
+
+---
+
+## 🗄️ Data Storage
+
+### LocalStorage Structure
+```javascript
+{
+  "gold-transactions": [...],      // Gold inventory transactions
+  "melting-batches": [...],        // Melting process data
+  "market-transactions": [...],    // Market buy/sell data
+  "orders": [...],                 // Order records
+  "workers": [...],                // Worker information
+  "app-settings": {}               // App preferences
+}
+```
+
+### Future: Backend Integration
+Application is ready for backend API integration with planned support for:
+- Database persistence
+- User authentication
+- Real-time synchronization
+- Multi-user support
+
+---
+
+## 🎨 Responsive Design
+
+- **Desktop** (≥1024px) - Full sidebar navigation
+- **Tablet** (768-1023px) - Adaptive layout
+- **Mobile** (<768px) - Mobile-optimized navigation
 
 ---
 
 ## 🏗️ Component Architecture
 
 ### UI Component System
-Built with Radix UI + Tailwind CSS:
-
-```typescript
-// Example: Using a Card component
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
-<Card>
-  <CardHeader>
-    <CardTitle>Title</CardTitle>
-  </CardHeader>
-  <CardContent>
-    Content here
-  </CardContent>
-</Card>
+18 base components built with Radix UI + Tailwind CSS:
 ```
-
-### Dialog Components
-Reusable modal dialogs:
-
-```typescript
-// Example: Dialog for new transaction
-import { Dialog } from "@/components/ui/dialog"
-
-<Dialog>
-  <DialogTrigger>Open</DialogTrigger>
-  <DialogContent>
-    {/* Form content */}
-  </DialogContent>
-</Dialog>
+Button, Card, Dialog, Input, Label, Badge, Tabs, Table,
+Select, Switch, Slider, Avatar, Progress, Separator,
+Sheet, Menubar, Sonner, and more...
 ```
 
 ### Layout Components
-Page structure:
+- Header with navigation
+- Sidebar with active state
+- Mobile navigation drawer
 
-```typescript
-// Header with navigation
-<Header />
-
-// Sidebar navigation
-<Sidebar />
-
-// Main content area
-<main className="flex-1">
-  {children}
-</main>
-```
+### Feature Components
+Specialized components for each module:
+- TransactionsTable, Dialogs, Forms, etc.
 
 ---
 
-## 💻 Usage Examples
+## 🔒 Security & Best Practices
 
-### Creating a New Gold Transaction
+### Implemented
+✅ TypeScript for type safety  
+✅ Input validation on forms  
+✅ XSS protection via React  
+✅ Component isolation  
+✅ Error boundaries  
 
-```typescript
-// Use Zustand store to manage transactions
-import { useGoldStore } from "@/lib/store"
-
-const Component = () => {
-  const { addTransaction } = useGoldStore()
-  
-  const handleSubmit = (data) => {
-    addTransaction({
-      type: "issue",
-      weight: 100,
-      purity: 999,
-      date: new Date()
-    })
-  }
-}
-```
-
-### Using the Melting Calculator
-
-```typescript
-// Calculate purity conversion
-const calculatePurity = (weight: number, fromPurity: number, toPurity: number) => {
-  const pureGold = (weight * fromPurity) / 1000
-  const outputWeight = (pureGold * 1000) / toPurity
-  return outputWeight
-}
-```
-
-### Generating PDF Export
-
-```typescript
-import { useReactToPrint } from "react-to-print"
-
-const ExportButton = () => {
-  const printRef = useRef()
-  const handlePrint = useReactToPrint({ content: () => printRef.current })
-  
-  return (
-    <>
-      <button onClick={handlePrint}>Export PDF</button>
-      <div ref={printRef}>{/* Content to print */}</div>
-    </>
-  )
-}
-```
-
----
-
-## ⚙️ Configuration
-
-### Theme Customization
-
-Modify `tailwind.config.js`:
-
-```javascript
-export default {
-  theme: {
-    extend: {
-      colors: {
-        // Custom colors
-      }
-    }
-  }
-}
-```
-
-### Environment Variables
-
-Create `.env.local`:
-
-```env
-NEXT_PUBLIC_APP_NAME=Gold Workshop Pro
-NEXT_PUBLIC_API_URL=http://localhost:3000
-```
-
----
-
-## 📝 Scripts
-
-```bash
-# Development
-npm run dev              # Start with Turbopack
-npm run build           # Build for production
-npm start               # Start production server
-npm run lint            # Run ESLint
-
-# Type checking
-npm run type-check      # (If configured)
-```
-
----
-
-## 🎨 Styling
-
-### Tailwind CSS Classes
-
-```tsx
-// Responsive design
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-
-// Flexbox
-<div className="flex items-center justify-between gap-4">
-
-// Spacing
-<div className="p-4 md:p-6 space-y-4">
-
-// Colors
-<div className="text-slate-900 bg-blue-50">
-```
-
-### Dark Mode
-
-```tsx
-// Theme provider in layout
-<ThemeProvider attribute="class" defaultTheme="system">
-  {children}
-</ThemeProvider>
-
-// Using theme in components
-import { useTheme } from "next-themes"
-
-const Component = () => {
-  const { theme, setTheme } = useTheme()
-}
-```
-
----
-
-## 🔒 Security Considerations
-
-✅ **Implemented:**
-- TypeScript for type safety
-- Input validation
-- Component isolation
-- Secure state management
-- Error handling
-
-⚠️ **Recommended for Production:**
-- Add authentication (NextAuth.js)
+### Recommended for Production
+- Add authentication system
 - Implement backend API
-- Add rate limiting
 - Use HTTPS
+- Add rate limiting
 - Implement CSRF protection
-- Add database encryption
+- Enable database encryption
 
 ---
 
-## 🧪 Testing
+## 📊 Project Statistics
 
-To add tests, install Jest and React Testing Library:
+| Metric | Value |
+|--------|-------|
+| Framework | Next.js 15.5.4 |
+| Language | TypeScript 5 |
+| Components | 30+ |
+| Pages | 8 |
+| Type Coverage | 100% |
+| Dependencies | 25+ |
 
+---
+
+## 🚀 Production Deployment
+
+### Option 1: Vercel (Recommended)
 ```bash
-npm install --save-dev jest @testing-library/react @testing-library/jest-dom
+npm i -g vercel
+vercel
+```
+
+### Option 2: Docker
+```bash
+docker build -t gold-workshop .
+docker run -p 3000:3000 gold-workshop
+```
+
+### Option 3: Custom Server
+```bash
+npm run build
+npm start
 ```
 
 ---
 
-## 📚 Documentation
+## 🐛 Troubleshooting
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [React Documentation](https://react.dev)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-- [Radix UI](https://www.radix-ui.com/docs)
-- [Zustand](https://github.com/pmndrs/zustand)
+### Port 3000 already in use
+```bash
+npm run dev -- -p 3001
+```
+
+### Dependencies not installing
+```bash
+npm cache clean --force
+rm -r node_modules package-lock.json
+npm install
+```
+
+### TypeScript errors
+```bash
+npm run build
+```
+
+### Styling not applying
+```bash
+npm run dev
+# Wait for Turbopack compilation
+```
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how:
-
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit: `git commit -m 'Add amazing feature'`
+4. Push: `git push origin feature/amazing-feature`
+5. Open Pull Request
 
-### Code Style
-- Use TypeScript
-- Follow ESLint rules
-- Keep components modular
-- Maintain responsive design
-- Add JSDoc comments
-
----
-
-## 📦 Deployment
-
-### Vercel (Recommended)
-
-```bash
-# Install Vercel CLI
-npm install -g vercel
-
-# Deploy
-vercel
-```
-
-### Docker
-
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-CMD ["npm", "start"]
-```
+### Code Standards
+- Follow TypeScript best practices
+- Use meaningful names
+- Add comments for complex logic
+- Test your changes
 
 ---
 
-## 🐛 Known Issues & Limitations
+## 📚 Resources
 
-- **Data Storage:** Currently uses LocalStorage (suitable for demo/prototype)
-- **Scalability:** No database backend yet
-- **Authentication:** No user authentication system
-- **Real-time:** No WebSocket/real-time updates
-- **Mobile:** Responsive but not native mobile app
-
-### Roadmap
-
-- [ ] Backend API integration
-- [ ] User authentication & authorization
-- [ ] Database implementation
-- [ ] Real-time updates
-- [ ] Mobile app (React Native)
-- [ ] Advanced analytics
-- [ ] Inventory forecasting
-- [ ] Multi-user support
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [Zustand](https://github.com/pmndrs/zustand)
+- [Radix UI](https://www.radix-ui.com/docs)
 
 ---
 
-## 📄 License
+## 🗺️ Roadmap
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### Phase 1 ✅ (Current)
+- ✅ Core UI and routing
+- ✅ LocalStorage persistence
+- ✅ 8 feature modules
+- ✅ Dark mode support
+
+### Phase 2 📋 (Upcoming)
+- 🔄 Backend API integration
+- 🔄 User authentication
+- 🔄 Database implementation
+- 🔄 Real-time updates
+
+### Phase 3 🎯 (Future)
+- 📊 Advanced analytics
+- 🔐 Role-based access
+- 📱 Mobile app (React Native)
+- 🌐 Multi-language support
 
 ---
 
-## 👨‍💼 Author
+## 📝 License
+
+MIT License - see [LICENSE](LICENSE) for details
+
+---
+
+## 👤 Author
 
 **Enzo Ha6ks**  
-Repository: [enzoha6ks/gold-workshop-pro-master](https://github.com/enzoha6ks/gold-workshop-pro-master)
+GitHub: [@enzoha6ks](https://github.com/enzoha6ks)  
+Repository: [gold-workshop-pro-master](https://github.com/enzoha6ks/gold-workshop-pro-master)
 
 ---
 
@@ -560,31 +416,24 @@ Repository: [enzoha6ks/gold-workshop-pro-master](https://github.com/enzoha6ks/go
 
 - [Next.js](https://nextjs.org/) - React framework
 - [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [Radix UI](https://www.radix-ui.com/) - Component library
-- [Framer Motion](https://www.framer.com/motion/) - Animations
+- [Radix UI](https://www.radix-ui.com/) - Components
 - [Zustand](https://github.com/pmndrs/zustand) - State management
 
 ---
 
 ## 📞 Support
 
-For issues and questions:
-- Open an [Issue](https://github.com/enzoha6ks/gold-workshop-pro-master/issues)
-- Check existing documentation
-- Review code comments
+For issues, questions, or suggestions:
+- **GitHub Issues** - Report bugs and request features
+- **GitHub Discussions** - Ask questions and share ideas
+- **Pull Requests** - Contribute improvements
 
 ---
 
-## ⭐ Show Your Support
-
-If you find this project useful, please consider:
-- ⭐ Giving it a star on GitHub
-- 🍴 Forking the repository
-- 📢 Sharing with others
-- 💬 Providing feedback
+⭐ If you find this project useful, please consider giving it a star on GitHub!
 
 ---
 
-**Made with ❤️ for gold business management**
-
-Last Updated: November 30, 2025
+**Status:** ✅ Active Development  
+**Version:** 0.1.0  
+**Last Updated:** November 30, 2025
