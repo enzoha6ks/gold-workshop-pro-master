@@ -10,6 +10,8 @@ A comprehensive web application for managing gold business operations including 
 
 ---
 
+## Currently Under Development (In Future signup/login ,database feature will be added)
+
 ## ✨ Features
 
 ### Core Modules (8 Pages)
