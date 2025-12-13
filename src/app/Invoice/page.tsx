@@ -1,7 +1,6 @@
 
 
 
-
 // "use client";
 
 // import { useState, useRef } from "react";
@@ -46,6 +45,7 @@
 //   purity: number;
 //   rate: number;
 //   amount: number;
+//   pureWeight: number;
 // }
 
 // interface Invoice {
@@ -59,6 +59,7 @@
 //   items: InvoiceItem[];
 //   subtotal: number;
 //   total: number;
+//   totalPureWeight: number;
 //   notes: string;
 //   status: "draft" | "sent" | "paid" | "overdue" | "issued" | "received";
 // }
@@ -87,10 +88,12 @@
 //         purity: 916,
 //         rate: 0,
 //         amount: 0,
+//         pureWeight: 0,
 //       },
 //     ],
 //     subtotal: 0,
 //     total: 0,
+//     totalPureWeight: 0,
 //     notes: "",
 //     status: "draft",
 //   });
@@ -121,10 +124,22 @@
 //       items: prev.items.map((item) => {
 //         if (item.id === itemId) {
 //           const updatedItem = { ...item, [field]: value };
+          
+//           // Calculate pure weight whenever weight or purity changes
+//           if (field === "weight" || field === "purity") {
+//             updatedItem.pureWeight = (updatedItem.weight * updatedItem.purity) / 1000;
+//           }
+          
 //           // Recalculate amount if quantity, weight, or rate changes
 //           if (field === "quantity" || field === "weight" || field === "rate") {
 //             updatedItem.amount = updatedItem.quantity * updatedItem.weight * updatedItem.rate;
 //           }
+          
+//           // Calculate pure weight if directly updated
+//           if (field === "pureWeight") {
+//             updatedItem.pureWeight = Number(value);
+//           }
+          
 //           return updatedItem;
 //         }
 //         return item;
@@ -142,6 +157,7 @@
 //       purity: 916,
 //       rate: 0,
 //       amount: 0,
+//       pureWeight: 0,
 //     };
 //     setInvoice((prev) => ({
 //       ...prev,
@@ -165,11 +181,13 @@
 //   const recalculateTotals = () => {
 //     const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
 //     const total = subtotal;
+//     const totalPureWeight = invoice.items.reduce((sum, item) => sum + item.pureWeight, 0);
 
 //     setInvoice((prev) => ({
 //       ...prev,
 //       subtotal,
 //       total,
+//       totalPureWeight,
 //     }));
 //     toast.success("Totals recalculated!");
 //   };
@@ -178,12 +196,14 @@
 //   useState(() => {
 //     const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
 //     const total = subtotal;
+//     const totalPureWeight = invoice.items.reduce((sum, item) => sum + item.pureWeight, 0);
 
-//     if (invoice.subtotal !== subtotal || invoice.total !== total) {
+//     if (invoice.subtotal !== subtotal || invoice.total !== total || invoice.totalPureWeight !== totalPureWeight) {
 //       setInvoice(prev => ({
 //         ...prev,
 //         subtotal,
 //         total,
+//         totalPureWeight,
 //       }));
 //     }
 //   });
@@ -234,6 +254,7 @@
 //     // Recalculate totals before generating PDF
 //     const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
 //     const total = subtotal;
+//     const totalPureWeight = invoice.items.reduce((sum, item) => sum + item.pureWeight, 0);
 
 //     // Generate table rows
 //     const tableRowsHTML = invoice.items
@@ -242,8 +263,9 @@
 //       <tr>
 //         <td class="item-desc">${item.description}</td>
 //         <td class="text-center">${item.quantity}</td>
-//         <td class="text-right">${item.weight.toFixed(3)}g</td>
+//         <td class="text-right">${item.weight.toFixed(3)}</td>
 //         <td class="text-right">${item.purity}‰</td>
+//         <td class="text-right">${item.pureWeight.toFixed(3)}</td>
 //         <td class="text-right">${item.rate.toLocaleString("en-US", {
 //           minimumFractionDigits: 2,
 //         })}</td>
@@ -708,25 +730,19 @@
 //               </div>
 //             </div>
 
-//                <!-- Customer Section -->
-            
-            
+//             <!-- Customer Section -->
 //             <div class="customer-section">
-              
-             
-              
-              
 //               <div class="customer-box">
 //                 <h3>From</h3>
 //                 <div class="customer-details">
 //                   <p><strong>BARKAT AL-KHAIR</strong></p>
 //                   <p>KUWAIT CITY, SHARQ</p>
 //                   <p>TEL: 90947886, 99273356</p>
-//                   <p>CR: 1234567890</p>
+//                   <p>CR: 115558 </p>
 //                 </div>
 //               </div>
 
-//                <div class="customer-box">
+//               <div class="customer-box">
 //                 <h3>Bill To</h3>
 //                 <div class="customer-details">
 //                   <p><strong>${invoice.customerName || "Customer Name"}</strong></p>
@@ -736,21 +752,18 @@
 //               </div>
 //             </div>
 
-           
-
-            
-
 //             <!-- Items Section -->
 //             <div class="items-section">
 //               <h3 class="section-header">Invoice Items</h3>
 //               <table>
 //                 <thead>
 //                   <tr>
-//                     <th style="width: 35%">Description</th>
+//                     <th style="width: 30%">Description</th>
 //                     <th class="text-center" style="width: 8%">Qty</th>
-//                     <th class="text-right" style="width: 12%">Weight</th>
+//                     <th class="text-right" style="width: 10%">Weight (g)</th>
 //                     <th class="text-right" style="width: 10%">Purity</th>
-//                     <th class="text-right" style="width: 15%">Rate (KWD)</th>
+//                     <th class="text-right" style="width: 10%">Pure (g)</th>
+//                     <th class="text-right" style="width: 12%">Rate (KWD)</th>
 //                     <th class="text-right" style="width: 20%">Amount (KWD)</th>
 //                   </tr>
 //                 </thead>
@@ -769,6 +782,10 @@
 //             <!-- Totals -->
 //             <div class="totals-section">
 //               <div class="totals-box">
+//                 <div class="total-row">
+//                   <span class="total-label">Total Pure Weight</span>
+//                   <span class="total-value">${totalPureWeight.toFixed(3)}<span class="currency">g</span></span>
+//                 </div>
 //                 <div class="total-row grand-total">
 //                   <span class="total-label">Total Amount</span>
 //                   <span class="total-value">${total.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
@@ -1127,27 +1144,26 @@
 //                             type="number"
 //                             className="font-medium text-sm"
 //                           />
-//                            {/* ------------------------------------------ */}
-//                            <div className="sm:col-span-3 space-y-1 ">
-//                             <Label htmlFor={`item-rate-${item.id}`} className="text-xs">
-//                               Pure Wieght
-//                            </Label>
-//                         <Input
-//                           id={`item-rate-${item.id}`}
-//                           type="number"
-//                           value={item.rate}
-//                           onChange={(e) =>
-//                             handleItemChange(
-//                               item.id,
-//                               "Pure",
-//                               parseFloat(e.target.value) || 0
-//                             )
-//                           }
-//                           placeholder="0.00"
-//                           className="text-sm"
-//                         />
-//                       </div>
-//                          {/* ---------------------------------------------------- */}
+//                           <div className="sm:col-span-3 space-y-1">
+//                             <Label htmlFor={`item-pure-${item.id}`} className="text-xs">
+//                               Pure Weight (g)
+//                             </Label>
+//                             <Input
+//                               id={`item-pure-${item.id}`}
+//                               type="number"
+//                               step="0.001"
+//                               value={item.pureWeight}
+//                               onChange={(e) =>
+//                                 handleItemChange(
+//                                   item.id,
+//                                   "pureWeight",
+//                                   parseFloat(e.target.value) || 0
+//                                 )
+//                               }
+//                               placeholder="0.000"
+//                               className="text-sm"
+//                             />
+//                           </div>
 //                           {invoice.items.length > 1 && (
 //                             <Button
 //                               variant="outline"
@@ -1248,6 +1264,9 @@
 //                       </Badge>
 //                     </p>
 //                     <p>
+//                       <strong>Total Pure Weight:</strong> {invoice.totalPureWeight.toFixed(3)} g
+//                     </p>
+//                     <p>
 //                       <strong>Total Amount:</strong> {invoice.total.toLocaleString()} KWD
 //                     </p>
 //                   </div>
@@ -1263,6 +1282,12 @@
 //                 </CardTitle>
 //               </CardHeader>
 //               <CardContent className="space-y-3">
+//                 <div className="flex justify-between border-t pt-2 dark:border-slate-700">
+//                   <span className="font-bold dark:text-slate-100">Total Pure Weight:</span>
+//                   <span className="font-bold text-base md:text-lg dark:text-slate-100">
+//                     {invoice.totalPureWeight.toFixed(3)} g
+//                   </span>
+//                 </div>
 //                 <div className="flex justify-between border-t pt-2 dark:border-slate-700">
 //                   <span className="font-bold dark:text-slate-100">Total Amount:</span>
 //                   <span className="font-bold text-base md:text-lg dark:text-slate-100">
@@ -1317,9 +1342,11 @@
 
 
 
+
+
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -1379,6 +1406,11 @@ interface Invoice {
   notes: string;
   status: "draft" | "sent" | "paid" | "overdue" | "issued" | "received";
 }
+
+// Pure gold calculation function
+export const calculatePureGold = (weight: number, purity: number): number => {
+  return Number(((weight * purity) / 999).toFixed(3));
+};
 
 export default function InvoicePage() {
   const invoiceRef = useRef(null);
@@ -1441,19 +1473,29 @@ export default function InvoicePage() {
         if (item.id === itemId) {
           const updatedItem = { ...item, [field]: value };
           
-          // Calculate pure weight whenever weight or purity changes
+          // Calculate pure weight using the correct formula whenever weight or purity changes
           if (field === "weight" || field === "purity") {
-            updatedItem.pureWeight = (updatedItem.weight * updatedItem.purity) / 1000;
+            updatedItem.pureWeight = calculatePureGold(
+              Number(updatedItem.weight),
+              Number(updatedItem.purity)
+            );
           }
           
           // Recalculate amount if quantity, weight, or rate changes
           if (field === "quantity" || field === "weight" || field === "rate") {
-            updatedItem.amount = updatedItem.quantity * updatedItem.weight * updatedItem.rate;
+            updatedItem.amount = Number(
+              (updatedItem.quantity * updatedItem.weight * updatedItem.rate).toFixed(3)
+            );
           }
           
-          // Calculate pure weight if directly updated
+          // If pure weight is manually updated, recalculate the weight based on purity
           if (field === "pureWeight") {
-            updatedItem.pureWeight = Number(value);
+            const newPureWeight = Number(value);
+            updatedItem.pureWeight = newPureWeight;
+            // Calculate corresponding weight based on pure weight and purity
+            if (updatedItem.purity > 0) {
+              updatedItem.weight = Number(((newPureWeight * 999) / updatedItem.purity).toFixed(3));
+            }
           }
           
           return updatedItem;
@@ -1509,12 +1551,16 @@ export default function InvoicePage() {
   };
 
   // Auto-recalculate totals when items change
-  useState(() => {
+  useEffect(() => {
     const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
     const total = subtotal;
     const totalPureWeight = invoice.items.reduce((sum, item) => sum + item.pureWeight, 0);
 
-    if (invoice.subtotal !== subtotal || invoice.total !== total || invoice.totalPureWeight !== totalPureWeight) {
+    if (
+      Math.abs(invoice.subtotal - subtotal) > 0.001 ||
+      Math.abs(invoice.total - total) > 0.001 ||
+      Math.abs(invoice.totalPureWeight - totalPureWeight) > 0.001
+    ) {
       setInvoice(prev => ({
         ...prev,
         subtotal,
@@ -1522,7 +1568,7 @@ export default function InvoicePage() {
         totalPureWeight,
       }));
     }
-  });
+  }, [invoice.items, invoice.subtotal, invoice.total, invoice.totalPureWeight]);
 
   // Save invoice
   const handleSaveInvoice = () => {
@@ -2410,7 +2456,7 @@ export default function InvoicePage() {
                       </div>
                       <div className="sm:col-span-3 space-y-2">
                         <Label htmlFor={`item-purity-${item.id}`} className="text-xs">
-                          Purity
+                          Purity (‰)
                         </Label>
                         <Input
                           id={`item-purity-${item.id}`}
@@ -2428,11 +2474,12 @@ export default function InvoicePage() {
                       </div>
                       <div className="sm:col-span-3 space-y-2">
                         <Label htmlFor={`item-rate-${item.id}`} className="text-xs">
-                          Rate
+                          Rate (KWD)
                         </Label>
                         <Input
                           id={`item-rate-${item.id}`}
                           type="number"
+                          step="0.001"
                           value={item.rate}
                           onChange={(e) =>
                             handleItemChange(
@@ -2441,7 +2488,7 @@ export default function InvoicePage() {
                               parseFloat(e.target.value) || 0
                             )
                           }
-                          placeholder="0.00"
+                          placeholder="0.000"
                           className="text-sm"
                         />
                       </div>
@@ -2449,7 +2496,7 @@ export default function InvoicePage() {
                         <Label className="text-xs">Amount (KWD)</Label>
                         <div className="flex items-center gap-2">
                           <Input
-                            value={item.amount}
+                            value={item.amount.toFixed(3)}
                             onChange={(e) =>
                               handleItemChange(
                                 item.id,
@@ -2458,40 +2505,43 @@ export default function InvoicePage() {
                               )
                             }
                             type="number"
+                            step="0.001"
                             className="font-medium text-sm"
                           />
-                          <div className="sm:col-span-3 space-y-1">
-                            <Label htmlFor={`item-pure-${item.id}`} className="text-xs">
-                              Pure Weight (g)
-                            </Label>
-                            <Input
-                              id={`item-pure-${item.id}`}
-                              type="number"
-                              step="0.001"
-                              value={item.pureWeight}
-                              onChange={(e) =>
-                                handleItemChange(
-                                  item.id,
-                                  "pureWeight",
-                                  parseFloat(e.target.value) || 0
-                                )
-                              }
-                              placeholder="0.000"
-                              className="text-sm"
-                            />
-                          </div>
-                          {invoice.items.length > 1 && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => removeItem(item.id)}
-                              className="text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 h-9"
-                            >
-                              ×
-                            </Button>
-                          )}
                         </div>
                       </div>
+                      <div className="sm:col-span-6 space-y-2">
+                        <Label htmlFor={`item-pure-${item.id}`} className="text-xs">
+                          Pure Weight (g)
+                        </Label>
+                        <Input
+                          id={`item-pure-${item.id}`}
+                          type="number"
+                          step="0.001"
+                          value={item.pureWeight}
+                          onChange={(e) =>
+                            handleItemChange(
+                              item.id,
+                              "pureWeight",
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                          placeholder="0.000"
+                          className="text-sm"
+                        />
+                      </div>
+                      {invoice.items.length > 1 && (
+                        <div className="sm:col-span-12 flex justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeItem(item.id)}
+                            className="text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 h-9"
+                          >
+                            Remove Item
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -2583,7 +2633,7 @@ export default function InvoicePage() {
                       <strong>Total Pure Weight:</strong> {invoice.totalPureWeight.toFixed(3)} g
                     </p>
                     <p>
-                      <strong>Total Amount:</strong> {invoice.total.toLocaleString()} KWD
+                      <strong>Total Amount:</strong> {invoice.total.toFixed(3)} KWD
                     </p>
                   </div>
                 </div>
@@ -2607,7 +2657,7 @@ export default function InvoicePage() {
                 <div className="flex justify-between border-t pt-2 dark:border-slate-700">
                   <span className="font-bold dark:text-slate-100">Total Amount:</span>
                   <span className="font-bold text-base md:text-lg dark:text-slate-100">
-                    {invoice.total.toLocaleString()} KWD
+                    {invoice.total.toFixed(3)} KWD
                   </span>
                 </div>
                 <Button onClick={recalculateTotals} className="w-full mt-2 text-sm">
