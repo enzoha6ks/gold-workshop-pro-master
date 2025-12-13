@@ -174,6 +174,20 @@
 //     toast.success("Totals recalculated!");
 //   };
 
+//   // Auto-recalculate totals when items change
+//   useState(() => {
+//     const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
+//     const total = subtotal;
+
+//     if (invoice.subtotal !== subtotal || invoice.total !== total) {
+//       setInvoice(prev => ({
+//         ...prev,
+//         subtotal,
+//         total,
+//       }));
+//     }
+//   });
+
 //   // Save invoice
 //   const handleSaveInvoice = () => {
 //     recalculateTotals();
@@ -217,6 +231,10 @@
 //       return;
 //     }
 
+//     // Recalculate totals before generating PDF
+//     const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
+//     const total = subtotal;
+
 //     // Generate table rows
 //     const tableRowsHTML = invoice.items
 //       .map(
@@ -236,12 +254,6 @@
 //     `
 //       )
 //       .join("");
-
-//     // Calculate tax (example: 5% VAT)
-//     const taxRate = 0.05;
-//     const subtotal = invoice.total;
-//     const taxAmount = subtotal * taxRate;
-//     const grandTotal = subtotal + taxAmount;
 
 //     const printWindow = window.open("", "_blank");
 //     if (!printWindow) {
@@ -696,16 +708,14 @@
 //               </div>
 //             </div>
 
-//             <!-- Customer Section -->
+//                <!-- Customer Section -->
+            
+            
 //             <div class="customer-section">
-//               <div class="customer-box">
-//                 <h3>Bill To</h3>
-//                 <div class="customer-details">
-//                   <p><strong>${invoice.customerName || "Customer Name"}</strong></p>
-//                   <p>${invoice.customerAddress || "Customer Address"}</p>
-//                   <p>${invoice.customerPhone || "Phone Number"}</p>
-//                 </div>
-//               </div>
+              
+             
+              
+              
 //               <div class="customer-box">
 //                 <h3>From</h3>
 //                 <div class="customer-details">
@@ -715,7 +725,20 @@
 //                   <p>CR: 1234567890</p>
 //                 </div>
 //               </div>
+
+//                <div class="customer-box">
+//                 <h3>Bill To</h3>
+//                 <div class="customer-details">
+//                   <p><strong>${invoice.customerName || "Customer Name"}</strong></p>
+//                   <p>${invoice.customerAddress || "Customer Address"}</p>
+//                   <p>${invoice.customerPhone || "Phone Number"}</p>
+//                 </div>
+//               </div>
 //             </div>
+
+           
+
+            
 
 //             <!-- Items Section -->
 //             <div class="items-section">
@@ -746,14 +769,9 @@
 //             <!-- Totals -->
 //             <div class="totals-section">
 //               <div class="totals-box">
-//                 <div class="total-row">
-//                   <span class="total-label">Subtotal</span>
-//                   <span class="total-value">${subtotal.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
-//                 </div>
-               
 //                 <div class="total-row grand-total">
 //                   <span class="total-label">Total Amount</span>
-//                   <span class="total-value">${grandTotal.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
+//                   <span class="total-value">${total.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
 //                 </div>
 //               </div>
 //             </div>
@@ -954,15 +972,15 @@
 //                 />
 //               </div>
 //               <div className="space-y-2">
-//                 <Label htmlFor="customerAddress" className="text-sm">
-//                   Address
+//                 <Label htmlFor="customerAddress"  className="text-sm">
+//                   Civil Id 
 //                 </Label>
 //                 <Input
 //                   id="customerAddress"
 //                   value={invoice.customerAddress}
 //                   onChange={(e) => handleInputChange("customerAddress", e.target.value)}
 //                   className="min-h-[60px] md:min-h-[80px] text-sm"
-//                   placeholder="Enter customer address"
+//                   placeholder="Enter customer Civil Id"
 //                 />
 //               </div>
 //               <div className="space-y-2">
@@ -1109,6 +1127,27 @@
 //                             type="number"
 //                             className="font-medium text-sm"
 //                           />
+//                            {/* ------------------------------------------ */}
+//                            <div className="sm:col-span-3 space-y-1 ">
+//                             <Label htmlFor={`item-rate-${item.id}`} className="text-xs">
+//                               Pure Wieght
+//                            </Label>
+//                         <Input
+//                           id={`item-rate-${item.id}`}
+//                           type="number"
+//                           value={item.rate}
+//                           onChange={(e) =>
+//                             handleItemChange(
+//                               item.id,
+//                               "Pure",
+//                               parseFloat(e.target.value) || 0
+//                             )
+//                           }
+//                           placeholder="0.00"
+//                           className="text-sm"
+//                         />
+//                       </div>
+//                          {/* ---------------------------------------------------- */}
 //                           {invoice.items.length > 1 && (
 //                             <Button
 //                               variant="outline"
@@ -1208,6 +1247,9 @@
 //                         {invoice.status.toUpperCase()}
 //                       </Badge>
 //                     </p>
+//                     <p>
+//                       <strong>Total Amount:</strong> {invoice.total.toLocaleString()} KWD
+//                     </p>
 //                   </div>
 //                 </div>
 //               </CardContent>
@@ -1268,9 +1310,10 @@
 //         </div>
 //       </div>
 //     </div>
-
 //   );
 // }
+
+
 
 
 
@@ -1318,6 +1361,7 @@ interface InvoiceItem {
   purity: number;
   rate: number;
   amount: number;
+  pureWeight: number;
 }
 
 interface Invoice {
@@ -1331,6 +1375,7 @@ interface Invoice {
   items: InvoiceItem[];
   subtotal: number;
   total: number;
+  totalPureWeight: number;
   notes: string;
   status: "draft" | "sent" | "paid" | "overdue" | "issued" | "received";
 }
@@ -1359,10 +1404,12 @@ export default function InvoicePage() {
         purity: 916,
         rate: 0,
         amount: 0,
+        pureWeight: 0,
       },
     ],
     subtotal: 0,
     total: 0,
+    totalPureWeight: 0,
     notes: "",
     status: "draft",
   });
@@ -1393,10 +1440,22 @@ export default function InvoicePage() {
       items: prev.items.map((item) => {
         if (item.id === itemId) {
           const updatedItem = { ...item, [field]: value };
+          
+          // Calculate pure weight whenever weight or purity changes
+          if (field === "weight" || field === "purity") {
+            updatedItem.pureWeight = (updatedItem.weight * updatedItem.purity) / 1000;
+          }
+          
           // Recalculate amount if quantity, weight, or rate changes
           if (field === "quantity" || field === "weight" || field === "rate") {
             updatedItem.amount = updatedItem.quantity * updatedItem.weight * updatedItem.rate;
           }
+          
+          // Calculate pure weight if directly updated
+          if (field === "pureWeight") {
+            updatedItem.pureWeight = Number(value);
+          }
+          
           return updatedItem;
         }
         return item;
@@ -1414,6 +1473,7 @@ export default function InvoicePage() {
       purity: 916,
       rate: 0,
       amount: 0,
+      pureWeight: 0,
     };
     setInvoice((prev) => ({
       ...prev,
@@ -1437,11 +1497,13 @@ export default function InvoicePage() {
   const recalculateTotals = () => {
     const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
     const total = subtotal;
+    const totalPureWeight = invoice.items.reduce((sum, item) => sum + item.pureWeight, 0);
 
     setInvoice((prev) => ({
       ...prev,
       subtotal,
       total,
+      totalPureWeight,
     }));
     toast.success("Totals recalculated!");
   };
@@ -1450,12 +1512,14 @@ export default function InvoicePage() {
   useState(() => {
     const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
     const total = subtotal;
-    
-    if (invoice.subtotal !== subtotal || invoice.total !== total) {
+    const totalPureWeight = invoice.items.reduce((sum, item) => sum + item.pureWeight, 0);
+
+    if (invoice.subtotal !== subtotal || invoice.total !== total || invoice.totalPureWeight !== totalPureWeight) {
       setInvoice(prev => ({
         ...prev,
         subtotal,
         total,
+        totalPureWeight,
       }));
     }
   });
@@ -1506,6 +1570,7 @@ export default function InvoicePage() {
     // Recalculate totals before generating PDF
     const subtotal = invoice.items.reduce((sum, item) => sum + item.amount, 0);
     const total = subtotal;
+    const totalPureWeight = invoice.items.reduce((sum, item) => sum + item.pureWeight, 0);
 
     // Generate table rows
     const tableRowsHTML = invoice.items
@@ -1514,8 +1579,9 @@ export default function InvoicePage() {
       <tr>
         <td class="item-desc">${item.description}</td>
         <td class="text-center">${item.quantity}</td>
-        <td class="text-right">${item.weight.toFixed(3)}g</td>
+        <td class="text-right">${item.weight.toFixed(3)}</td>
         <td class="text-right">${item.purity}‰</td>
+        <td class="text-right">${item.pureWeight.toFixed(3)}</td>
         <td class="text-right">${item.rate.toLocaleString("en-US", {
           minimumFractionDigits: 2,
         })}</td>
@@ -1983,20 +2049,21 @@ export default function InvoicePage() {
             <!-- Customer Section -->
             <div class="customer-section">
               <div class="customer-box">
-                <h3>Bill To</h3>
-                <div class="customer-details">
-                  <p><strong>${invoice.customerName || "Customer Name"}</strong></p>
-                  <p>${invoice.customerAddress || "Customer Address"}</p>
-                  <p>${invoice.customerPhone || "Phone Number"}</p>
-                </div>
-              </div>
-              <div class="customer-box">
                 <h3>From</h3>
                 <div class="customer-details">
                   <p><strong>BARKAT AL-KHAIR</strong></p>
                   <p>KUWAIT CITY, SHARQ</p>
                   <p>TEL: 90947886, 99273356</p>
-                  <p>CR: 1234567890</p>
+                  <p>CR: 115558 </p>
+                </div>
+              </div>
+
+              <div class="customer-box">
+                <h3>Bill To</h3>
+                <div class="customer-details">
+                  <p><strong>${invoice.customerName || "Customer Name"}</strong></p>
+                  <p>${invoice.customerAddress || "Customer Address"}</p>
+                  <p>${invoice.customerPhone || "Phone Number"}</p>
                 </div>
               </div>
             </div>
@@ -2007,11 +2074,12 @@ export default function InvoicePage() {
               <table>
                 <thead>
                   <tr>
-                    <th style="width: 35%">Description</th>
+                    <th style="width: 30%">Description</th>
                     <th class="text-center" style="width: 8%">Qty</th>
-                    <th class="text-right" style="width: 12%">Weight</th>
+                    <th class="text-right" style="width: 10%">Weight (g)</th>
                     <th class="text-right" style="width: 10%">Purity</th>
-                    <th class="text-right" style="width: 15%">Rate (KWD)</th>
+                    <th class="text-right" style="width: 10%">Pure (g)</th>
+                    <th class="text-right" style="width: 12%">Rate (KWD)</th>
                     <th class="text-right" style="width: 20%">Amount (KWD)</th>
                   </tr>
                 </thead>
@@ -2030,6 +2098,10 @@ export default function InvoicePage() {
             <!-- Totals -->
             <div class="totals-section">
               <div class="totals-box">
+                <div class="total-row">
+                  <span class="total-label">Total Pure Weight</span>
+                  <span class="total-value">${totalPureWeight.toFixed(3)}<span class="currency">g</span></span>
+                </div>
                 <div class="total-row grand-total">
                   <span class="total-label">Total Amount</span>
                   <span class="total-value">${total.toLocaleString("en-US", { minimumFractionDigits: 3 })}<span class="currency">KWD</span></span>
@@ -2233,15 +2305,15 @@ export default function InvoicePage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customerAddress" className="text-sm">
-                  Address
+                <Label htmlFor="customerAddress"  className="text-sm">
+                  Civil Id 
                 </Label>
                 <Input
                   id="customerAddress"
                   value={invoice.customerAddress}
                   onChange={(e) => handleInputChange("customerAddress", e.target.value)}
                   className="min-h-[60px] md:min-h-[80px] text-sm"
-                  placeholder="Enter customer address"
+                  placeholder="Enter customer Civil Id"
                 />
               </div>
               <div className="space-y-2">
@@ -2388,6 +2460,26 @@ export default function InvoicePage() {
                             type="number"
                             className="font-medium text-sm"
                           />
+                          <div className="sm:col-span-3 space-y-1">
+                            <Label htmlFor={`item-pure-${item.id}`} className="text-xs">
+                              Pure Weight (g)
+                            </Label>
+                            <Input
+                              id={`item-pure-${item.id}`}
+                              type="number"
+                              step="0.001"
+                              value={item.pureWeight}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  item.id,
+                                  "pureWeight",
+                                  parseFloat(e.target.value) || 0
+                                )
+                              }
+                              placeholder="0.000"
+                              className="text-sm"
+                            />
+                          </div>
                           {invoice.items.length > 1 && (
                             <Button
                               variant="outline"
@@ -2488,6 +2580,9 @@ export default function InvoicePage() {
                       </Badge>
                     </p>
                     <p>
+                      <strong>Total Pure Weight:</strong> {invoice.totalPureWeight.toFixed(3)} g
+                    </p>
+                    <p>
                       <strong>Total Amount:</strong> {invoice.total.toLocaleString()} KWD
                     </p>
                   </div>
@@ -2503,6 +2598,12 @@ export default function InvoicePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                <div className="flex justify-between border-t pt-2 dark:border-slate-700">
+                  <span className="font-bold dark:text-slate-100">Total Pure Weight:</span>
+                  <span className="font-bold text-base md:text-lg dark:text-slate-100">
+                    {invoice.totalPureWeight.toFixed(3)} g
+                  </span>
+                </div>
                 <div className="flex justify-between border-t pt-2 dark:border-slate-700">
                   <span className="font-bold dark:text-slate-100">Total Amount:</span>
                   <span className="font-bold text-base md:text-lg dark:text-slate-100">

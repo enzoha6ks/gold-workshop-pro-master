@@ -7,6 +7,7 @@ import { Package, AlertTriangle, Users, Building } from "lucide-react"
 import { useAppStore } from "@/lib/store"
 
 export default function DashboardPage() {
+  
   const [isClient, setIsClient] = useState(false)
   
   const { 
