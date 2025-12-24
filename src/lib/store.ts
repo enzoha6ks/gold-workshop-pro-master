@@ -1,94 +1,13 @@
-
-
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import {
   GoldTransaction,
   MarketTransaction,
   PurityStock,
   calculateStockFromTransactions,
+  addTransaction,
 } from "./gold-calculations";
+import { toast } from "sonner";
 
-// Melting Store Interfaces
-export interface MeltingBatch {
-  id: string;
-  inputWeight: number;
-  inputPurity: number;
-  outputWeight: number;
-  outputPurity: number;
-  weightChange: number; // Can be positive (gain) or negative (loss)
-  efficiency: number;
-  date: string;
-  status: "completed" | "in-progress" | "planned";
-  notes?: string; // Added notes field
-}
-
-interface MeltingStore {
-  meltingBatches: MeltingBatch[];
-  addMeltingBatch: (batch: Omit<MeltingBatch, "id">) => void;
-  updateMeltingBatch: (id: string, batch: Partial<MeltingBatch>) => void;
-  deleteMeltingBatch: (id: string) => void;
-  getTotalMeltingLoss: () => number;
-  getTotalMeltingGain: () => number;
-  getAverageEfficiency: () => number;
-}
-
-export const useMeltingStore = create<MeltingStore>()(
-  persist(
-    (set, get) => ({
-      meltingBatches: [],
-
-      addMeltingBatch: (batchData) => {
-        const newBatch: MeltingBatch = {
-          ...batchData,
-          id: `MEL-${Date.now().toString().slice(-4)}`,
-        };
-        set((state) => ({
-          meltingBatches: [...state.meltingBatches, newBatch],
-        }));
-      },
-
-      updateMeltingBatch: (id, updates) => {
-        set((state) => ({
-          meltingBatches: state.meltingBatches.map((batch) =>
-            batch.id === id ? { ...batch, ...updates } : batch
-          ),
-        }));
-      },
-
-      deleteMeltingBatch: (id) => {
-        set((state) => ({
-          meltingBatches: state.meltingBatches.filter((batch) => batch.id !== id),
-        }));
-      },
-
-      getTotalMeltingLoss: () => {
-        return get().meltingBatches
-          .filter(batch => batch.weightChange < 0)
-          .reduce((sum, batch) => sum + Math.abs(batch.weightChange), 0);
-      },
-
-      getTotalMeltingGain: () => {
-        return get().meltingBatches
-          .filter(batch => batch.weightChange > 0)
-          .reduce((sum, batch) => sum + batch.weightChange, 0);
-      },
-
-      getAverageEfficiency: () => {
-        const batches = get().meltingBatches;
-        if (batches.length === 0) return 0;
-        return (
-          batches.reduce((sum, batch) => sum + batch.efficiency, 0) / batches.length
-        );
-      },
-    }),
-    {
-      name: "melting-storage",
-    }
-  )
-);
-
-// Define types
 interface ExtraLoss {
   id: string;
   worker: string;
@@ -97,330 +16,404 @@ interface ExtraLoss {
   date: string;
 }
 
-// Add Order interface
-export interface Order {
-  id: string;
-  customer: string;
-  phone: string;
-  items: string;
-  goldWeight: number;
-  purity: number;
-  makingCharges: number;
-  status:
-    | "pending"
-    | "designing"
-    | "making"
-    | "polishing"
-    | "completed"
-    | "delivered"
-    | "cancelled";
-  deadline: string;
-  progress: number;
-  createdAt: string;
-  completedAt?: string;
-  notes?: string;
-  revenue?: number;
-}
-
 interface AppState {
-  // Core state
+  // Data
   transactions: GoldTransaction[];
   marketTransactions: MarketTransaction[];
-  extraLosses: ExtraLoss[];
+  addMarketTransaction: (transaction: any) => Promise<void>;
+  extraLosses: ExtraLoss[]; 
   purityStock: PurityStock;
-  orders: Order[]; // Add orders to store
+  orders: any[];
+  meltingBatches: any[];
+  workers: any[];
+  isLoading: boolean;
+  
+  addExtraLoss: (lossData: any) => Promise<void>;
+  addWorker: (workerData: { name: string }) => Promise<void>; 
+  fetchInitialData: () => Promise<void>;
+  addOrder: (orderData: any) => Promise<void>;
+  updateOrder: (id: string, updates: any) => Promise<void>;
+  completeOrder: (id: string, revenue?: number) => Promise<void>;
+  deliverOrder: (id: string) => Promise<void>; 
 
-  // Actions
-  addTransaction: (transaction: GoldTransaction) => void;
-  addMarketTransaction: (transaction: MarketTransaction) => void;
-  addExtraLoss: (loss: ExtraLoss) => void;
-  setPurityStock: (purityStock: PurityStock) => void;
-  addOrder: (order: Order) => void; // Add order action
-  updateOrder: (orderId: string, updates: Partial<Order>) => void; // Update order action
-  completeOrder: (orderId: string, revenue: number) => void; // Complete order action
-  deliverOrder: (orderId: string) => void; // Deliver order action
-  getVendorRemainingBalance: (vendor: string) => number;
+  // Sync
+  setInitialData: (data: any) => void;
+  setPurityStock: (newStock: PurityStock) => Promise<void>;
+  addTransaction: (transaction: any) => Promise<void>; 
 
-  // Calculations
-  calculateStock: () => ReturnType<typeof calculateStockFromTransactions>;
-
-  // Market functions
-  getMarketLoss: () => number;
-  getMonthlyMarketLoss: () => number;
-  getVendors: () => string[];
-
-  // Extra loss functions
+  // Dashboard Functions (Must match your dashboard destructuring exactly)
+  calculateStock: () => PurityStock;
   getTotalExtraLoss: () => number;
   getMonthlyExtraLoss: () => number;
-
-  // Order functions
+  getVendors: () => string[];
+  getVendorRemainingBalance: (vendor: string) => number;
+  getTotalLoss: () => number;
+  getMonthlyTotalLoss: () => number;
+  getMarketLoss: () => number;
+  getMonthlyMarketLoss: () => number;
   getTotalRevenue: () => number;
-  getActiveOrders: () => Order[];
-  getCompletedOrders: () => Order[];
-
-  // Total Loss functions - ADDED
-  getTotalLoss: () => number; // Melting loss + Market loss + Extra loss
-  getMonthlyTotalLoss: () => number; // Monthly total loss
-
-  // Force updates
-  lastUpdate: number;
+  getActiveOrders: () => any[];
+  getCompletedOrders: () => any[];
+  getTotalMeltingLoss: () => number;
+  getTotalMeltingGain: () => number;
 }
 
-export const useAppStore = create<AppState>()(
-  persist(
-    (set, get) => ({
-      // Initial state - EMPTY
-      transactions: [],
-      marketTransactions: [],
-      extraLosses: [],
-      purityStock: {
-        "995": 0,
-        "917": 0,
-        "875": 0,
-        "750": 0,
-        pure: 0,
-      },
-      orders: [], // Initialize empty orders array
-      lastUpdate: Date.now(),
+export const useAppStore = create<AppState>((set, get) => ({
+  transactions: [],
+  marketTransactions: [],
+  extraLosses: [],
+  purityStock: { "995": 0, "917": 0, "875": 0, "750": 0, pure: 0 },
+  orders: [],
+  meltingBatches: [],
+  workers: [],
+  isLoading: true,
 
-      // Add regular transaction
-      addTransaction: (transaction) => {
-        set((state) => ({
-          transactions: [transaction, ...state.transactions],
-          lastUpdate: Date.now(),
-        }));
-      },
+  setInitialData: (data) => set({
+  transactions: data.transactions || [],
+  marketTransactions: data.marketTransactions || [],
+  extraLosses: data.extraLosses || [],
+  orders: data.orders || [],
+  meltingBatches: data.meltingBatches || [],
+  workers: data.workers || [],
+  // Check this line below:
+  purityStock: data.purityStock || { "995": 0, "917": 0, "875": 0, "750": 0, pure: 0 },
+  isLoading: false,
+}),
 
-      // Add market transaction
-      addMarketTransaction: (transaction) => {
-        set((state) => ({
-          marketTransactions: [transaction, ...state.marketTransactions],
-          lastUpdate: Date.now(),
-        }));
-      },
+  // Extra loss logic
+  addExtraLoss: async (newLoss) => {
+    try {
+      const response = await fetch('/api/workers/extra-loss', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newLoss),
+      });
 
-      // Add extra loss
-      addExtraLoss: (loss) => {
-        set((state) => ({
-          extraLosses: [loss, ...state.extraLosses],
-          lastUpdate: Date.now(),
-        }));
-      },
+      if (!response.ok) throw new Error("Failed to save extra loss");
 
-      // Set purity stock
-      setPurityStock: (purityStock) => {
-        set((state) => ({
-          purityStock,
-          lastUpdate: Date.now(),
-        }));
-      },
-
-      // Add order
-      addOrder: (order) => {
-        set((state) => ({
-          orders: [order, ...state.orders],
-          lastUpdate: Date.now(),
-        }));
-      },
-
-      // Update order
-      updateOrder: (orderId, updates) => {
-        set((state) => ({
-          orders: state.orders.map((order) =>
-            order.id === orderId ? { ...order, ...updates } : order
-          ),
-          lastUpdate: Date.now(),
-        }));
-      },
-
-      // Complete order
-      completeOrder: (orderId, revenue) => {
-        set((state) => ({
-          orders: state.orders.map((order) =>
-            order.id === orderId
-              ? {
-                  ...order,
-                  status: "completed",
-                  progress: 100,
-                  completedAt: new Date().toISOString(),
-                  revenue,
-                }
-              : order
-          ),
-          lastUpdate: Date.now(),
-        }));
-      },
-
-      // Deliver order
-      deliverOrder: (orderId) => {
-        set((state) => ({
-          orders: state.orders.map((order) =>
-            order.id === orderId
-              ? {
-                  ...order,
-                  status: "delivered",
-                }
-              : order
-          ),
-          lastUpdate: Date.now(),
-        }));
-      },
-
-      // Calculate stock
-      calculateStock: () => {
-        const state = get();
-        return calculateStockFromTransactions(
-          state.transactions,
-          state.purityStock
-        );
-      },
-
-      // MARKET FUNCTIONS
-
-      // Calculate total market loss
-      getMarketLoss: () => {
-        const state = get();
-        return state.marketTransactions
-          .filter((t) => t.type === "receive_market" && t.loss)
-          .reduce((total, t) => total + (t.loss || 0), 0);
-      },
-
-      // Calculate monthly market loss
-      getMonthlyMarketLoss: () => {
-        const state = get();
-        const now = new Date();
-        return state.marketTransactions
-          .filter(
-            (t) =>
-              t.type === "receive_market" &&
-              t.loss &&
-              new Date(t.date).getMonth() === now.getMonth() &&
-              new Date(t.date).getFullYear() === now.getFullYear()
-          )
-          .reduce((total, t) => total + (t.loss || 0), 0);
-      },
-
-      // Get unique vendors
-      getVendors: () => {
-        const state = get();
-        const vendors = new Set(state.marketTransactions.map((t) => t.vendor));
-        return Array.from(vendors);
-      },
-
-      // EXTRA LOSS FUNCTIONS
-
-      // Calculate total extra loss
-      getTotalExtraLoss: () => {
-        const state = get();
-        return state.extraLosses.reduce(
-          (total, loss) => total + loss.amount,
-          0
-        );
-      },
-
-      // Calculate monthly extra loss
-      getMonthlyExtraLoss: () => {
-        const state = get();
-        const now = new Date();
-        return state.extraLosses
-          .filter((loss) => {
-            const lossDate = new Date(loss.date);
-            return (
-              lossDate.getMonth() === now.getMonth() &&
-              lossDate.getFullYear() === now.getFullYear()
-            );
-          })
-          .reduce((total, loss) => total + loss.amount, 0);
-      },
-
-      // ORDER FUNCTIONS
-
-      // Calculate total revenue
-      getTotalRevenue: () => {
-        const state = get();
-        return state.orders
-          .filter((order) => order.revenue)
-          .reduce((total, order) => total + (order.revenue || 0), 0);
-      },
-
-      // Get active orders
-      getActiveOrders: () => {
-        const state = get();
-        return state.orders.filter((order) =>
-          ["pending", "designing", "making", "polishing"].includes(order.status)
-        );
-      },
-
-      // Get completed orders
-      getCompletedOrders: () => {
-        const state = get();
-        return state.orders.filter((order) =>
-          ["completed", "delivered"].includes(order.status)
-        );
-      },
-
-      // TOTAL LOSS FUNCTIONS - ADDED
-      getTotalLoss: () => {
-        const state = get();
-        
-        // Get melting loss from melting store
-        const meltingStore = useMeltingStore.getState();
-        const meltingLoss = meltingStore.getTotalMeltingLoss();
-        
-        // Get market loss
-        const marketLoss = state.getMarketLoss();
-        
-        // Get extra loss
-        const extraLoss = state.getTotalExtraLoss();
-        
-        return meltingLoss + marketLoss + extraLoss;
-      },
-
-      getMonthlyTotalLoss: () => {
-        const state = get();
-        const meltingStore = useMeltingStore.getState();
-        const now = new Date();
-        
-        // Monthly melting loss
-        const monthlyMeltingLoss = meltingStore.meltingBatches
-          .filter(batch => {
-            const batchDate = new Date(batch.date);
-            return (
-              batchDate.getMonth() === now.getMonth() &&
-              batchDate.getFullYear() === now.getFullYear() &&
-              batch.weightChange < 0
-            );
-          })
-          .reduce((sum, batch) => sum + Math.abs(batch.weightChange), 0);
-        
-        // Monthly market loss
-        const monthlyMarketLoss = state.getMonthlyMarketLoss();
-        
-        // Monthly extra loss
-        const monthlyExtraLoss = state.getMonthlyExtraLoss();
-        
-        return monthlyMeltingLoss + monthlyMarketLoss + monthlyExtraLoss;
-      },
-
-      // Vendor balance function
-      getVendorRemainingBalance: (vendor: string) => {
-        const sentTransactions = get()
-          .marketTransactions.filter(
-            (t) => t.vendor === vendor && t.type === "send_market"
-          )
-          .reduce((total, t) => total + (t.weight * t.purity) / 999, 0);
-
-        const receivedTransactions = get()
-          .marketTransactions.filter(
-            (t) => t.vendor === vendor && t.type === "receive_market"
-          )
-          .reduce((total, t) => total + (t.pureGoldContent || 0), 0);
-
-        return sentTransactions - receivedTransactions;
-      },
-    }),
-    {
-      name: "app-storage",
+      const savedLoss = await response.json();
+      
+      set((state) => ({
+        extraLosses: [savedLoss, ...state.extraLosses]
+      }));
+    } catch (error) {
+      console.error("Store Error (addExtraLoss):", error);
     }
-  )
-);
+  },
+
+  addWorker: async (workerData) => {
+    try {
+      const response = await fetch('/api/workers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(workerData),
+      });
+      const savedWorker = await response.json();
+      set((state) => ({
+        workers: [...(state.workers || []), savedWorker]
+      }));
+    } catch (error) {
+      console.error("Error adding worker:", error);
+    }
+  },
+
+
+
+  setPurityStock: async (newStock: PurityStock) => {
+    // 1. Update the local state for instant UI feedback
+    set({ purityStock: newStock });
+
+    // 2. Sync to the Database
+    try {
+      const response = await fetch('/api/gold/purity-stock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStock),
+      });
+
+      if (!response.ok) {
+        // Get the actual error message from the API
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Server Error Details:", errorData);
+        throw new Error(errorData.error || `Server Error ${response.status}`);
+      }
+
+      console.log("✅ Sync Successful");
+    } catch (error: any) {
+      console.error("Database sync error:", error.message);
+      // This will now show the REAL reason in your browser console
+    }
+  },
+
+  addTransaction: async (transactionData) => {
+    try {
+      const response = await fetch('/api/gold/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(transactionData),
+      });
+
+      if (!response.ok) {
+        const errorDetail = await response.text();
+        console.error("Server Error Detail:", errorDetail); // This helps us debug
+        throw new Error("Failed to save transaction");
+      }
+
+      const savedTransaction = await response.json();
+      
+      set((state) => ({
+        transactions: [savedTransaction, ...state.transactions]
+      }));
+      
+      console.log("✅ Transaction Saved to DB");
+    } catch (error) {
+      console.error("Add Transaction Error:", error);
+    }
+  },
+
+  addMarketTransaction: async (transactionData) => {
+    try {
+      const response = await fetch('/api/market', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(transactionData),
+      });
+
+      if (!response.ok) {
+        const errorDetail = await response.text();
+        console.error("Server Error Detail:", errorDetail);
+        throw new Error("Failed to save market transaction");
+      }
+
+      const savedTransaction = await response.json();
+      
+      set((state) => ({
+        marketTransactions: [savedTransaction, ...state.marketTransactions]
+      }));
+    } catch (error) {
+      console.error("Error adding market transaction:", error);
+    }
+  },
+
+  fetchInitialData: async () => {
+    try {
+      const response = await fetch('/api/sync/get-all');
+      if (!response.ok) throw new Error('Sync failed');
+      const data = await response.json();
+
+      set({
+        orders: data.orders || [],
+        transactions: data.transactions || [],
+        workers: data.workers || [],
+        extraLosses: data.extraLosses || [],
+        meltingBatches: data.meltingBatches || [],
+        marketTransactions: data.marketTransactions || [],
+        purityStock: data.purityStock || { "995": 0, "917": 0, "875": 0, "750": 0, pure: 0 },
+      });
+    } catch (error) {
+      console.error("Store sync error:", error);
+    }
+  },
+
+  addOrder: async (orderData) => {
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const detail = await response.text().catch(() => null);
+        console.error('Server Error (addOrder):', detail);
+        throw new Error('Failed to save order');
+      }
+
+      const newOrder = await response.json();
+      set((state) => ({ orders: [newOrder, ...state.orders] }));
+    } catch (error) {
+      console.error("Error adding order:", error);
+    }
+  },
+
+  updateOrder: async (id, updates) => {
+    try {
+      const response = await fetch(`/api/orders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) throw new Error("Failed to update order");
+
+      const updatedOrder = await response.json();
+
+      set((state) => ({
+        orders: state.orders.map((o) => (o.id === id ? updatedOrder : o)),
+      }));
+    } catch (error) {
+      console.error("Error updating order:", error);
+      toast.error("Failed to update order in database");
+    }
+  },
+
+  completeOrder: async (id, revenue) => {
+    try {
+      const response = await fetch(`/api/orders/${id}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ revenue, status: 'completed' }),
+      });
+
+      if (!response.ok) {
+        const detail = await response.text().catch(() => null);
+        console.error('Server Error (completeOrder):', detail);
+        throw new Error('Failed to complete order');
+      }
+
+      const updatedOrder = await response.json();
+      set((state) => ({
+        orders: state.orders.map((o) => (o.id === id ? updatedOrder : o)),
+      }));
+    } catch (error) {
+      console.error("Failed to complete order:", error);
+      toast.error("Failed to complete order in database");
+    }
+  },
+
+  deliverOrder: async (id) => {
+    try {
+      const response = await fetch(`/api/orders/${id}/deliver`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'delivered' }),
+      });
+
+      if (!response.ok) {
+        const detail = await response.text().catch(() => null);
+        console.error('Server Error (deliverOrder):', detail);
+        throw new Error('Failed to deliver order');
+      }
+
+      const updatedOrder = await response.json();
+      set((state) => ({
+        orders: state.orders.map((o) => (o.id === id ? updatedOrder : o)),
+      }));
+    } catch (error) {
+      console.error("Failed to deliver order:", error);
+      toast.error("Failed to deliver order in database");
+    }
+  },
+
+  // 1. Live Stock Calculation
+  calculateStock: () => {
+    const state = get();
+    return calculateStockFromTransactions(state.transactions, state.purityStock);
+  },
+
+  // 2. Extra Loss Helpers
+  getTotalExtraLoss: () => {
+    return get().extraLosses.reduce((sum, loss) => sum + (Number(loss.amount) || 0), 0);
+  },
+
+  getMonthlyExtraLoss: () => {
+    const now = new Date();
+    return get().extraLosses
+      .filter(loss => {
+        const d = new Date(loss.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      })
+      .reduce((sum, loss) => sum + (Number(loss.amount) || 0), 0);
+  },
+
+  // 3. Market Helpers
+  getVendors: () => {
+    const vendors = new Set(get().marketTransactions.map((t) => t.vendor));
+    return Array.from(vendors);
+  },
+
+  getVendorRemainingBalance: (vendor: string) => {
+    const state = get();
+    const sent = state.marketTransactions
+      .filter((t) => t.vendor === vendor && t.type === "send_market")
+      .reduce((total, t) => total + (Number(t.weight) * (Number(t.purity) || 0)) / 999, 0);
+
+    const received = state.marketTransactions
+      .filter((t) => t.vendor === vendor && t.type === "receive_market")
+      .reduce((total, t) => total + (Number(t.pureGoldContent) || 0), 0);
+
+    return sent - received;
+  },
+
+  // 4. Total Loss Calculations (Used in line 49 & 50 of your Dashboard)
+  getTotalLoss: () => {
+    const state = get();
+    const marketLoss = state.marketTransactions
+      .filter(t => t.type === "receive_market")
+      .reduce((sum, t) => sum + (Number(t.loss) || 0), 0);
+
+    const meltingLoss = state.meltingBatches
+      .reduce((sum, b) => sum + (Number(b.weightChange) < 0 ? Math.abs(Number(b.weightChange)) : 0), 0);
+
+    return state.getTotalExtraLoss() + marketLoss + meltingLoss;
+  },
+
+  getMonthlyTotalLoss: () => {
+    const now = new Date();
+    const state = get();
+
+    const marketMonthly = state.marketTransactions
+      .filter(t => {
+        const d = new Date(t.date);
+        return t.type === "receive_market" && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      })
+      .reduce((sum, t) => sum + (Number(t.loss) || 0), 0);
+
+    const meltingMonthly = state.meltingBatches
+      .filter(b => {
+        const d = new Date(b.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && Number(b.weightChange) < 0;
+      })
+      .reduce((sum, b) => sum + Math.abs(Number(b.weightChange)), 0);
+
+    return state.getMonthlyExtraLoss() + marketMonthly + meltingMonthly;
+  },
+
+  // Market Loss Helpers
+  getMarketLoss: () => {
+    return get().marketTransactions?.reduce((sum, t) => sum + (t.loss || 0), 0) || 0;
+  },
+
+  getMonthlyMarketLoss: () => {
+    const now = new Date();
+    return get().marketTransactions
+      ?.filter(t => {
+        const d = new Date(t.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      })
+      .reduce((sum, t) => sum + (t.loss || 0), 0) || 0;
+  },
+
+  // Revenue and Orders Helpers
+  getTotalRevenue: () => {
+    return get().orders?.reduce((sum, o) => sum + (o.revenue || 0), 0) || 0;
+  },
+
+  getActiveOrders: () => {
+    return get().orders?.filter(o => o.status !== 'completed') || [];
+  },
+
+  getCompletedOrders: () => {
+    return get().orders?.filter(o => o.status === 'completed') || [];
+  },
+
+  // Melting Batch Helpers
+  getTotalMeltingLoss: () => {
+    return get().meltingBatches?.reduce((sum, b) => sum + (b.loss || 0), 0) || 0;
+  },
+
+  getTotalMeltingGain: () => {
+    // Calculate total weight gains from melting batches
+    return get().meltingBatches?.reduce((sum, b) => sum + (Number(b.weightChange) > 0 ? Number(b.weightChange) : 0), 0) || 0;
+  }
+}));

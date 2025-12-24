@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 1. THE PARENT: ORGANIZATION
+model Organization {
+  id                String              @id @default(cuid())
+  name              String
+  createdAt         DateTime            @default(now())
+  
+  // Relations
+  users             User[]
+  workers           Worker[]
+  orders            Order[]
+  transactions      Transaction[]
+  marketTransactions MarketTransaction[]
+  meltingBatches    MeltingBatch[]
+  extraLosses       ExtraLoss[]
+  purityStock       PurityStock?
+}
+
+// 2. THE USER
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  password       String
+  name           String?
+  role           String       @default("ADMIN")
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+}
+
+// 3. WORKERS (From your "workers" key)
+model Worker {
+  id             String   @id // Matches your UUID/Timestamp ID
+  name           String
+  totalIssued    Float    @default(0)
+  totalReturned  Float    @default(0)
+  totalLoss      Float    @default(0)
+  efficiency     Float    @default(0)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+// 4. ORDERS (From "app-storage" -> state.orders)
+model Order {
+  id             String   @id // Matches your ORD-XXXX ID
+  customer       String
+  phone          String
+  items          String
+  goldWeight     Float
+  purity         Float
+  status         String   // e.g., "pending", "delivered"
+  progress       Int      @default(0)
+  makingCharges  Float    @default(0)
+  revenue        Float?
+  deadline       String?
+  createdAt      DateTime @default(now())
+  completedAt    DateTime?
+  notes          String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+// 5. STANDARD TRANSACTIONS (Issue/Return from state.transactions)
+model Transaction {
+  id             String   @id @default(cuid())
+  type           String   // "issue" or "return"
+  weight         Float
+  purity         Float
+  pureGoldContent Float
+  toFrom         String   // Worker Name
+  loss           Float    @default(0)
+  date           DateTime @default(now())
+  notes          String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+// 6. MARKET TRANSACTIONS (Complex Received Purities from state.marketTransactions)
+model MarketTransaction {
+  id                String   @id // REC-XXXX
+  type              String   // "receive_market" or "send_market"
+  vendor            String
+  weight            Float
+  purity            String?  // Can be "Mixed" or a number
+  pureGoldContent   Float
+  receivedPurities  Json?    // Stores the array [{purity: 999, weight: 100...}]
+  remainingBalance  Float?
+  status            String
+  date              DateTime @default(now())
+  notes             String?
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id])
+}
+
+// 7. GOLD MELTING (From "gold-melting-batches")
+model MeltingBatch {
+  id             String   @id // MEL-XXX
+  date           DateTime @default(now())
+  inputWeight    Float
+  inputPurity    Float
+  outputWeight   Float
+  outputPurity   Float
+  loss           Float
+  efficiency     Float
+  status         String
+  notes          String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+// 8. EXTRA LOSSES (From state.extraLosses)
+model ExtraLoss {
+  id             String   @id
+  worker         String
+  amount         Float
+  note           String?
+  date           DateTime @default(now())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+// 9. PURITY STOCK (Balances for the Gold Safe)
+
+model PurityStock {
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  p995           Float        @default(0) @map("995") 
+  p917           Float        @default(0) @map("917")
+  p875           Float        @default(0) @map("875")
+  p750           Float        @default(0) @map("750")
+  pure           Float        @default(0)
+  updatedAt      DateTime     @updatedAt
+  
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}

@@ -661,7 +661,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Download, TrendingUp, TrendingDown, Users, Calendar, BarChart3, Package, Building, Gem, Flame } from "lucide-react"
-import { useAppStore, useMeltingStore } from "@/lib/store"
+import { useAppStore } from "@/lib/store"
 import jsPDF from "jspdf"
 
 export default function ReportsPage() {
@@ -674,6 +674,7 @@ export default function ReportsPage() {
     marketTransactions,
     extraLosses,
     orders,
+    meltingBatches,
     calculateStock,
     getTotalExtraLoss,
     getMonthlyExtraLoss,
@@ -681,10 +682,10 @@ export default function ReportsPage() {
     getMonthlyMarketLoss,
     getTotalRevenue,
     getActiveOrders,
-    getCompletedOrders
+    getCompletedOrders,
+    getTotalMeltingLoss,
+    getTotalMeltingGain
   } = useAppStore()
-
-  const { meltingBatches, getTotalMeltingLoss, getTotalMeltingGain } = useMeltingStore()
 
   useEffect(() => {
     setIsClient(true)
