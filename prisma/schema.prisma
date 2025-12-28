@@ -39,7 +39,7 @@ model User {
 
 // 3. WORKERS 
 model Worker {
-  id             String   @id same as ur  UUID/Timestamp ID
+  id             String   @id @default(cuid())
   name           String
   totalIssued    Float    @default(0)
   totalReturned  Float    @default(0)

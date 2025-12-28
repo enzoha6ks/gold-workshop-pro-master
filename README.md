@@ -14,7 +14,22 @@ A comprehensive web application for managing gold business operations including 
 
 ## ✨ Features
 
-### Core Modules (8 Pages)
+### Core Modules
+- **User Authentication**: Secure login and signup processes for users.
+- **📊 Dashboard** - Real-time statistics and quick access
+- **🔐 Gold Safe** - Complete inventory management
+- **🔥 Melting** - Process tracking and efficiency monitoring
+- **📈 Market Transactions**: Manage and track market transactions with detailed records.
+- **📄 Reports**: Generate reports for transactions and market analysis.
+- **⚙️ Settings**: Customize user preferences and account settings.
+- **📱 Responsive Design**: Optimized for both desktop and mobile devices.
+
+## Tech Stack
+- **Frontend**: React, Next.js, Tailwind CSS
+- **Backend**: Node.js, Express
+- **Database**: Prisma, PostgreSQL
+- **State Management**: Context API
+- **Authentication**: JWT (JSON Web Tokens)
 - **📊 Dashboard** - Real-time statistics and quick access
 - **🔐 Gold Safe** - Complete inventory management
 - **🔥 Melting** - Process tracking and efficiency monitoring
