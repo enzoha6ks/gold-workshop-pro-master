@@ -8,7 +8,7 @@ datasource db {
   directUrl = env("DATABASE_URL")
 }
 
-// 1. THE PARENT: ORGANIZATION
+// 1. THE PARENT  ORGANIZATION
 model Organization {
   id                String              @id @default(cuid())
   name              String
@@ -25,7 +25,7 @@ model Organization {
   purityStock       PurityStock?
 }
 
-// 2. THE USER
+// the users data 
 model User {
   id             String       @id @default(cuid())
   email          String       @unique
@@ -37,9 +37,9 @@ model User {
   createdAt      DateTime     @default(now())
 }
 
-// 3. WORKERS (From your "workers" key)
+// 3. WORKERS 
 model Worker {
-  id             String   @id // Matches your UUID/Timestamp ID
+  id             String   @id same as ur  UUID/Timestamp ID
   name           String
   totalIssued    Float    @default(0)
   totalReturned  Float    @default(0)
@@ -49,7 +49,7 @@ model Worker {
   organization   Organization @relation(fields: [organizationId], references: [id])
 }
 
-// 4. ORDERS (From "app-storage" -> state.orders)
+// 4. ORDERS (From "app-storage" to  state.orders)
 model Order {
   id             String   @id // Matches your ORD-XXXX ID
   customer       String
@@ -57,7 +57,7 @@ model Order {
   items          String
   goldWeight     Float
   purity         Float
-  status         String   // e.g., "pending", "delivered"
+  status         String   
   progress       Int      @default(0)
   makingCharges  Float    @default(0)
   revenue        Float?
