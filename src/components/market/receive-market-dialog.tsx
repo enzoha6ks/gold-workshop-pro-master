@@ -1,4 +1,6 @@
 
+
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -29,19 +31,30 @@ export function ReceiveMarketDialog({
   const [remainingBalance, setRemainingBalance] = useState("")
   const [notes, setNotes] = useState("")
   
-  const { getVendorRemainingBalance } = useAppStore()
+  const { getVendorRemainingBalance, marketTransactions } = useAppStore()
 
-  // FIXED: Filter vendors with ACTUAL remaining balance > 0.001 (to account for floating point)
-  const vendorsWithBalance = pendingTransactions.filter(transaction => {
+  // FIXED: Filter vendors with ACTUAL gold balance > 0.001
+  const vendorsWithBalance = (pendingTransactions || []).filter(transaction => {
     const balance = getVendorRemainingBalance(transaction.vendor)
-    return balance > 0.001 // Small threshold to account for floating point precision
+    const goldBalance = typeof balance === 'object' ? balance.gold : balance
+    return goldBalance > 0.001 // Positive balance means vendor owes us gold
   })
 
   // Get selected pending transaction
   const selectedTransaction = vendorsWithBalance.find(t => t.vendor === selectedVendor)
 
-  // Calculate vendor's current remaining balance
-  const vendorCurrentBalance = selectedVendor ? getVendorRemainingBalance(selectedVendor) : 0
+  // For the original sent transaction display, show both physical and pure
+  const originalPhysicalWeight = selectedTransaction?.weight || 0
+  const originalPurity = selectedTransaction?.purity || 917
+  const originalPureGold = (originalPhysicalWeight * originalPurity) / 999
+
+  // Calculate vendor's current remaining balance (GOLD only)
+  const vendorCurrentBalance = (() => {
+    if (!selectedVendor) return 0
+    const balance = getVendorRemainingBalance(selectedVendor)
+    const goldBalance = typeof balance === 'object' ? balance.gold : balance
+    return goldBalance > 0 ? goldBalance : 0
+  })()
 
   // Calculate total received weight from all purities
   const totalReceivedWeight = purities.reduce((total, item) => {
@@ -53,6 +66,11 @@ export function ReceiveMarketDialog({
     const weight = parseFloat(item.weight) || 0
     const purity = parseFloat(item.purity) || 0
     return total + (weight * purity) / 999
+  }, 0)
+
+  // Calculate total physical weight received
+  const totalPhysicalWeight = purities.reduce((total, item) => {
+    return total + (parseFloat(item.weight) || 0)
   }, 0)
 
   // Calculate new remaining balance after this receipt
@@ -90,37 +108,37 @@ export function ReceiveMarketDialog({
     
     if (!selectedVendor || !selectedTransaction) return
 
+    // Calculate the new remaining balance after receiving gold
+    const newRemainingBalance = vendorCurrentBalance - actualPureGold
+
     const transaction = {
       id: `REC-${Date.now()}`,
       type: "receive_market",
       vendor: selectedVendor,
       date: new Date().toISOString(),
-      weight: totalReceivedWeight,
+      weight: totalPhysicalWeight, // Store physical weight
       purity: "Mixed",
-      pureGoldContent: actualPureGold, // This is CRITICAL - store the calculated pure gold
-      remainingBalance: parseFloat(remainingBalance) || 0,
+      pureGoldContent: actualPureGold, // Store pure gold equivalent
+      remainingBalance: newRemainingBalance > 0 ? newRemainingBalance : 0,
       notes,
-      // Store complete transaction history
-      originalTransaction: {
-        id: selectedTransaction.id,
-        weight: selectedTransaction.weight,
-        purity: selectedTransaction.purity,
-        date: selectedTransaction.date,
-        pureGoldSent: (selectedTransaction.weight * selectedTransaction.purity) / 999
-      },
-      // Store all received purities in detail
+      status: "completed",
+      // Store detailed breakdown
       receivedPurities: purities.filter(p => p.purity && p.weight).map(p => ({
+        physicalWeight: parseFloat(p.weight),
         purity: parseFloat(p.purity),
-        weight: parseFloat(p.weight),
         pureGold: (parseFloat(p.weight) * parseFloat(p.purity)) / 999
       })),
-      status: "completed",
+      // For reference
+      originalPhysicalWeight: selectedTransaction?.weight,
+      originalPurity: selectedTransaction?.purity,
+      originalPureGold: (selectedTransaction?.weight * selectedTransaction?.purity) / 999,
       vendorCurrentBalance: vendorCurrentBalance,
       newBalance: newRemainingBalance
     }
 
     console.log(`[RECEIVE] Receiving ${actualPureGold.toFixed(3)}g pure gold from ${selectedVendor}`)
-    console.log(`[RECEIVE] Vendor balance before: ${vendorCurrentBalance.toFixed(3)}g, after: ${newRemainingBalance.toFixed(3)}g`)
+    console.log(`[RECEIVE] Balance before: ${vendorCurrentBalance.toFixed(3)}g, after: ${newRemainingBalance.toFixed(3)}g`)
+    console.log(`[RECEIVE] Transaction being sent:`, transaction)
 
     onReceive(transaction)
     onOpenChange(false)
@@ -175,6 +193,7 @@ export function ReceiveMarketDialog({
                 ) : (
                   vendorsWithBalance.map((transaction) => {
                     const balance = getVendorRemainingBalance(transaction.vendor)
+                    const goldBalance = typeof balance === 'object' ? balance.gold : balance
                     return (
                       <SelectItem key={transaction.id} value={transaction.vendor}>
                         <div className="flex flex-col">
@@ -183,7 +202,7 @@ export function ReceiveMarketDialog({
                             {transaction.weight}g sent ({transaction.purity} purity)
                           </span>
                           <span className="text-xs text-amber-600 font-medium">
-                            Balance: {balance.toFixed(3)}g pure gold
+                            Balance: {goldBalance.toFixed(3)}g pure gold
                           </span>
                         </div>
                       </SelectItem>
@@ -211,7 +230,7 @@ export function ReceiveMarketDialog({
               <CardContent className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6">
                 <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div>
-                    <span className="text-slate-600 text-xs sm:text-sm">Current Balance:</span>
+                    <span className="text-slate-600 text-xs sm:text-sm">Current Gold Balance:</span>
                     <p className="font-medium text-amber-600 text-sm sm:text-base">
                       {vendorCurrentBalance.toFixed(3)}g pure gold
                     </p>
@@ -241,15 +260,15 @@ export function ReceiveMarketDialog({
               <CardContent className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6">
                 <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div>
-                    <span className="text-slate-600 text-xs sm:text-sm">Weight Sent:</span>
+                    <span className="text-slate-600 text-xs sm:text-sm">Physical Weight Sent:</span>
                     <p className="font-medium text-sm sm:text-base">{selectedTransaction.weight}g</p>
                   </div>
                   <div>
                     <span className="text-slate-600 text-xs sm:text-sm">Purity:</span>
-                    <p className="font-medium text-sm sm:text-base">{selectedTransaction.purity}</p>
+                    <p className="font-medium text-sm sm:text-base">{selectedTransaction.purity}K</p>
                   </div>
                   <div>
-                    <span className="text-slate-600 text-xs sm:text-sm">Pure Gold Content:</span>
+                    <span className="text-slate-600 text-xs sm:text-sm">Pure Gold Equivalent:</span>
                     <p className="font-medium text-green-600 text-sm sm:text-base">
                       {((selectedTransaction.weight * selectedTransaction.purity) / 999).toFixed(3)}g
                     </p>
@@ -326,24 +345,30 @@ export function ReceiveMarketDialog({
           </div>
 
           {/* Balance Summary */}
-          {(totalReceivedWeight > 0 || actualPureGold > 0) && (
+          {(totalPhysicalWeight > 0 || actualPureGold > 0) && (
             <Card className="bg-slate-50 border-slate-200">
               <CardHeader className="pb-3 p-4 sm:p-6">
                 <CardTitle className="text-sm">Transaction Summary</CardTitle>
               </CardHeader>
               <CardContent className="pt-0 px-4 sm:px-6 pb-4 sm:pb-6 space-y-2 sm:space-y-3 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs sm:text-sm">Total Received Weight:</span>
-                  <span className="font-medium text-sm sm:text-base">{totalReceivedWeight.toFixed(3)}g</span>
+                  <span className="text-xs sm:text-sm">Total Physical Weight Received:</span>
+                  <span className="font-medium text-sm sm:text-base">{totalPhysicalWeight.toFixed(3)}g</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-xs sm:text-sm">Actual Pure Gold Received:</span>
+                  <span className="text-xs sm:text-sm">Pure Gold Equivalent Received:</span>
                   <span className="font-medium text-green-600 text-sm sm:text-base">{actualPureGold.toFixed(3)}g</span>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t">
+                  <span className="text-xs sm:text-sm">Calculation:</span>
+                  <span className="text-xs text-slate-500">
+                    {purities.map(p => p.purity && p.weight && `${p.weight}g × ${p.purity}÷999`).join(' + ')}
+                  </span>
                 </div>
                 {selectedTransaction && (
                   <>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm">Expected Pure Gold:</span>
+                      <span className="text-xs sm:text-sm">Original Pure Gold Sent:</span>
                       <span className="font-medium text-sm sm:text-base">
                         {((selectedTransaction.weight * selectedTransaction.purity) / 999).toFixed(3)}g
                       </span>
@@ -351,12 +376,12 @@ export function ReceiveMarketDialog({
                     <div className="flex justify-between items-center border-t pt-2 sm:pt-3">
                       <span className="flex items-center gap-1 text-xs sm:text-sm">
                         <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 text-amber-500" />
-                        New Remaining Balance:
+                        Remaining Balance:
                       </span>
                       <span className={`font-medium text-sm sm:text-base ${
                         newRemainingBalance > 0 ? 'text-amber-600' : 'text-green-600'
                       }`}>
-                        {newRemainingBalance.toFixed(3)}g
+                        {newRemainingBalance.toFixed(3)}g pure gold
                       </span>
                     </div>
                   </>
@@ -367,7 +392,9 @@ export function ReceiveMarketDialog({
 
           {/* Remaining Balance Input */}
           <div className="space-y-2 sm:space-y-3">
-            <Label htmlFor="remainingBalance" className="text-sm sm:text-base">Remaining Balance (g) *</Label>
+            <Label htmlFor="remainingBalance" className="text-sm sm:text-base">
+              Remaining Balance (Pure Gold - grams) *
+            </Label>
             <Input
               id="remainingBalance"
               type="number"
@@ -379,7 +406,7 @@ export function ReceiveMarketDialog({
               className="text-sm sm:text-base"
             />
             <p className="text-xs text-slate-500">
-              Pure gold balance remaining with vendor after this receipt
+              Pure gold balance (weight × purity ÷ 999) remaining with vendor after this receipt
             </p>
           </div>
 

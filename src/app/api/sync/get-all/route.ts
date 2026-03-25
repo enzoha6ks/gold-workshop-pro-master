@@ -12,7 +12,7 @@ export async function GET() {
   const orgId = user.organizationId;
 
   try {
-    // Fetch all data in parallel for speed
+    // 1. Fetch all data including the new cashTransactions in parallel
     const [
       orders,
       transactions,
@@ -20,7 +20,8 @@ export async function GET() {
       extraLosses,
       meltingBatches,
       marketTransactions,
-      stockRecord
+      stockRecord,
+      cashTransactions // <--- Added this
     ] = await Promise.all([
       prisma.order.findMany({ 
         where: { organizationId: orgId },
@@ -35,9 +36,13 @@ export async function GET() {
       prisma.meltingBatch.findMany({ where: { organizationId: orgId } }),
       prisma.marketTransaction.findMany({ where: { organizationId: orgId } }),
       prisma.purityStock.findUnique({ where: { organizationId: orgId } }),
+      prisma.cashTransaction.findMany({ // <--- Fetch the payments
+        where: { organizationId: orgId },
+        orderBy: { date: 'desc' }
+      }),
     ]);
 
-    // Map the database names (p995) back to UI names ("995")
+    // 2. Map the database names (p995) back to UI names ("995")
     const purityStock = stockRecord ? {
       "995": stockRecord.p995,
       "917": stockRecord.p917,
@@ -46,6 +51,7 @@ export async function GET() {
       "pure": stockRecord.pure
     } : { "995": 0, "917": 0, "875": 0, "750": 0, "pure": 0 };
 
+    // 3. Return everything to the UI
     return NextResponse.json({
       orders,
       transactions,
@@ -53,9 +59,11 @@ export async function GET() {
       extraLosses,
       meltingBatches,
       marketTransactions,
-      purityStock
+      purityStock,
+      cashTransactions // <--- Include in the final response
     });
   } catch (error) {
+    console.error("Sync Error:", error);
     return NextResponse.json({ error: "Database fetch failed" }, { status: 500 });
   }
 }

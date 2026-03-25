@@ -27,7 +27,11 @@ interface AppState {
   meltingBatches: any[];
   workers: any[];
   isLoading: boolean;
+  cashTransactions: any[];
   
+  fetchCashTransactions: () => Promise<void>;
+  addCashTransaction: (data: any) => Promise<void>;
+  addCashPayment: (payment: any) => void;
   addExtraLoss: (lossData: any) => Promise<void>;
   addWorker: (workerData: { name: string }) => Promise<void>; 
   fetchInitialData: () => Promise<void>;
@@ -46,7 +50,7 @@ interface AppState {
   getTotalExtraLoss: () => number;
   getMonthlyExtraLoss: () => number;
   getVendors: () => string[];
-  getVendorRemainingBalance: (vendor: string) => number;
+  getVendorRemainingBalance: (vendor: any) => { gold: number; cash: number };
   getTotalLoss: () => number;
   getMonthlyTotalLoss: () => number;
   getMarketLoss: () => number;
@@ -67,6 +71,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   meltingBatches: [],
   workers: [],
   isLoading: true,
+  cashTransactions: [],
 
   setInitialData: (data) => set({
   transactions: data.transactions || [],
@@ -74,11 +79,78 @@ export const useAppStore = create<AppState>((set, get) => ({
   extraLosses: data.extraLosses || [],
   orders: data.orders || [],
   meltingBatches: data.meltingBatches || [],
+  cashTransactions: data.cashTransactions || [],
   workers: data.workers || [],
   // Check this line below:
   purityStock: data.purityStock || { "995": 0, "917": 0, "875": 0, "750": 0, pure: 0 },
   isLoading: false,
 }),
+
+  // Cash Transactions
+  fetchCashTransactions: async () => {
+    try {
+      const response = await fetch('/api/cash-transactions');
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Failed to fetch cash transactions:", errorData);
+        throw new Error(errorData.error || "Failed to fetch cash transactions");
+      }
+      
+      const data = await response.json();
+      set({ cashTransactions: data });
+      return data;
+    } catch (error) {
+      console.error("Error fetching cash transactions:", error);
+      set({ cashTransactions: [] });
+      // Don't throw - just return empty array
+      return [];
+    }
+  },
+
+  addCashTransaction: async (data: any) => {
+    try {
+      const response = await fetch('/api/cash-transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vendorName: data.vendorName,
+          amount: data.amount,
+          method: data.method || "cash",
+          notes: data.notes || `Cash payment received from ${data.vendorName}`,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Failed to save cash transaction:", errorData);
+        throw new Error(errorData.error || "Failed to save cash transaction");
+      }
+      
+      const saved = await response.json();
+      
+      set((state) => ({
+        cashTransactions: [saved, ...state.cashTransactions]
+      }));
+      
+      return saved;
+    } catch (error) {
+      console.error("Error adding cash:", error);
+      throw error;
+    }
+  },
+
+  addCashPayment: (payment) => set((state) => ({
+    cashTransactions: [
+      {
+        ...payment,
+        id: Math.random().toString(36).substring(2, 9),
+        date: new Date().toISOString(),
+        amount: Number(payment.amount),
+      },
+      ...(state.cashTransactions || []),
+    ]
+  })),
 
   // Extra loss logic
   addExtraLoss: async (newLoss) => {
@@ -332,17 +404,48 @@ export const useAppStore = create<AppState>((set, get) => ({
     return Array.from(vendors);
   },
 
-  getVendorRemainingBalance: (vendor: string) => {
+  getVendorRemainingBalance: (vendor: any) => {
     const state = get();
-    const sent = state.marketTransactions
-      .filter((t) => t.vendor === vendor && t.type === "send_market")
-      .reduce((total, t) => total + (Number(t.weight) * (Number(t.purity) || 0)) / 999, 0);
+    const vendorName = typeof vendor === 'string' ? vendor : vendor?.name;
 
-    const received = state.marketTransactions
-      .filter((t) => t.vendor === vendor && t.type === "receive_market")
-      .reduce((total, t) => total + (Number(t.pureGoldContent) || 0), 0);
+    // Get all market transactions for this vendor
+    const vendorTransactions = state.marketTransactions.filter(t => t.vendor === vendorName);
 
-    return sent - received;
+    // Calculate gold balance:
+    // Send_market: vendor takes gold (they owe us) -> ADD to balance
+    // Receive_market: vendor returns gold (they owe us less) -> SUBTRACT from balance
+    const goldBalance = vendorTransactions.reduce((balance, t) => {
+      if (t.type === "send_market") {
+        // Vendor takes gold - they owe us more
+        return balance + (t.pureGoldContent || t.weight || 0);
+      } else if (t.type === "receive_market") {
+        // Vendor returns gold - they owe us less
+        return balance - (t.pureGoldContent || t.weight || 0);
+      }
+      return balance;
+    }, 0);
+
+    // Get orders for cash balance
+    const vendorOrders = state.orders.filter(o => o.customer === vendorName);
+    const cashFromOrders = vendorOrders.reduce((sum, o) => sum + (Number(o.makingCharges) || 0), 0);
+
+    // Get cash payments
+    const vendorCashPayments = state.cashTransactions.filter(c => c.vendorName === vendorName);
+    const cashFromPayments = vendorCashPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+    // Get cash transactions from market
+    const cashFromMarket = vendorTransactions
+      .filter(t => t.type === "cash")
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+    const cashBalance = cashFromOrders - cashFromPayments - cashFromMarket;
+
+    console.log(`[BALANCE] ${vendorName}: Gold=${goldBalance.toFixed(3)}g, Cash=${cashBalance.toFixed(3)}KWD`);
+
+    return {
+      gold: Number(goldBalance.toFixed(3)),
+      cash: Number(cashBalance.toFixed(3))
+    };
   },
 
   // 4. Total Loss Calculations (Used in line 49 & 50 of your Dashboard)

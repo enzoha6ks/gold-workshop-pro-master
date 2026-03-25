@@ -38,16 +38,20 @@ export function SendMarketDialog({ open, onOpenChange, onSend }: SendMarketDialo
     const pureGoldContent = calculatePureGold(weight, purity)
 
     const transaction = {
-      id: Date.now().toString(),
+      id: `SEND-${Date.now()}`,
       type: "send_market" as const,
       vendor: formData.vendor,
       weight,
       purity,
       pureGoldContent,
-      date: new Date(),
+      remainingBalance: pureGoldContent, // CRITICAL: Set initial remaining balance
+      date: new Date().toISOString(),
       notes: formData.notes,
-      status: "pending" as const
+      status: "completed" as const // Change from "pending" to "completed"
     }
+
+    console.log(`[SEND] Sending ${weight}g of ${purity}K to ${formData.vendor}`);
+    console.log(`[SEND] Pure gold: ${pureGoldContent.toFixed(3)}g, Remaining balance: ${pureGoldContent.toFixed(3)}g`);
 
     onSend(transaction)
     toast.success("Gold sent to market!", {
@@ -145,6 +149,9 @@ export function SendMarketDialog({ open, onOpenChange, onSend }: SendMarketDialo
               </div>
               <div className="text-xs text-slate-500 mt-1">
                 Calculation: {formData.weight} × {formData.purity} ÷ 999 = {pureGoldContent.toFixed(3)}g
+              </div>
+              <div className="text-xs text-amber-600 mt-1 font-medium">
+                Balance to track: {pureGoldContent.toFixed(3)}g pure gold will be owed by vendor
               </div>
             </div>
           )}

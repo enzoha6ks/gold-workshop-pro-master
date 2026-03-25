@@ -23,6 +23,7 @@ model Organization {
   meltingBatches    MeltingBatch[]
   extraLosses       ExtraLoss[]
   purityStock       PurityStock?
+  cashTransactions  CashTransaction[]
 }
 
 // the users data 
@@ -142,3 +143,19 @@ model PurityStock {
   
   organization   Organization @relation(fields: [organizationId], references: [id])
 }
+
+
+// 10. cash model for satatement system  
+model CashTransaction {
+  id             String       @id @default(cuid())
+  date           DateTime     @default(now())
+  amount         Float        
+  type           String       @default("payment_received") 
+  method         String?      
+  notes          String?
+  vendorName     String       
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+// Also update the Organization model to include:
+// cashTransactions CashTransaction[]

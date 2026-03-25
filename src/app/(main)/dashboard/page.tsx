@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Package, AlertTriangle, Users, Building } from "lucide-react"
+import { Package, AlertTriangle, Users, Building, Coins } from "lucide-react"
 import { useAppStore } from "@/lib/store"
 
 export default function DashboardPage() {
@@ -50,10 +50,21 @@ export default function DashboardPage() {
   const monthlyAllLoss = getMonthlyTotalLoss() // Monthly total loss
   const vendors = getVendors()
 
-  // Calculate total remaining market balance from all vendors
-  const totalMarketBalance = vendors.reduce((total, vendor) => {
-    return total + getVendorRemainingBalance(vendor)
-  }, 0)
+ let totalMarketGold = 0;
+  let totalMarketCash = 0;
+
+  vendors.forEach(vendor => {
+    const balance = getVendorRemainingBalance(vendor);
+    
+    // Check if balance is the new object format { gold, cash }
+    if (typeof balance === 'object' && balance !== null) {
+      totalMarketGold += (Number(balance.gold) || 0);
+      totalMarketCash += (Number(balance.cash) || 0);
+    } else {
+      // Fallback for old number-only format
+      totalMarketGold += (Number(balance) || 0);
+    }
+  });
 
   // Calculate stats
   const totalTransactions = transactions.length
@@ -68,7 +79,7 @@ export default function DashboardPage() {
   const recentTransactions = transactions.slice(0, 5)
 
   // Stats array - UPDATED with total loss
-  const stats = [
+ const stats = [
     {
       title: "Total Stock",
       value: `${stock.totalWeight.toFixed(1)}g`,
@@ -77,11 +88,11 @@ export default function DashboardPage() {
       color: "text-blue-600"
     },
     {
-      title: "Active Workers",
-      value: uniqueWorkers.toString(),
-      subtitle: `${totalTransactions} transactions`,
-      icon: Users,
-      color: "text-green-600"
+      title: "Market Gold", // Renamed for clarity
+      value: `${totalMarketGold.toFixed(1)}g`,
+      subtitle: `${vendors.length} vendors`,
+      icon: Building,
+      color: "text-amber-600"
     },
     {
       title: "Total Loss",
@@ -91,11 +102,11 @@ export default function DashboardPage() {
       color: "text-rose-600"
     },
     {
-      title: "Market Balance",
-      value: `${totalMarketBalance.toFixed(1)}g`,
-      subtitle: `${vendors.length} vendors`,
-      icon: Building,
-      color: "text-amber-600"
+      title: "Market Cash", // Added a new card for the KWD balance
+      value: `${totalMarketCash.toFixed(2)} KD`,
+      subtitle: "Pending making charges",
+      icon: Coins,
+      color: "text-emerald-600"
     },
   ]
 
@@ -267,57 +278,59 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Market Balance Card */}
-        <Card className="border-amber-200">
-          <CardHeader className="pb-3 p-4 sm:p-6">
-            <CardTitle className="flex items-center gap-2 text-amber-700 text-base sm:text-lg">
-              <Building className="w-4 h-4 sm:w-5 sm:h-5" />
-              Market Balance Details
-            </CardTitle>
-            <CardDescription className="text-sm">Gold balance with market vendors</CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-            <div className="space-y-3 sm:space-y-4">
-              <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
-                <span className="text-sm font-medium text-amber-700">Total Balance</span>
-                <span className="font-mono font-bold text-amber-700 text-sm sm:text-base">
-                  {totalMarketBalance.toFixed(2)}g
-                </span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
-                <span className="text-sm font-medium text-amber-700">Active Vendors</span>
-                <span className="font-mono font-bold text-amber-700 text-sm sm:text-base">
-                  {vendors.length}
-                </span>
-              </div>
+{/* Market Balance Card */}
+<Card className="border-amber-200">
+  <CardHeader className="pb-3 p-4 sm:p-6">
+    <CardTitle className="flex items-center gap-2 text-amber-700 text-base sm:text-lg">
+      <Building className="w-4 h-4 sm:w-5 sm:h-5" />
+      Market Balance Details
+    </CardTitle>
+    <CardDescription className="text-sm">Gold and Cash with market vendors</CardDescription>
+  </CardHeader>
+  <CardContent className="p-4 sm:p-6 pt-0">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
+        <span className="text-sm font-medium text-amber-700">Total Gold Balance</span>
+        <span className="font-mono font-bold text-amber-700 text-sm sm:text-base">
+          {totalMarketGold.toFixed(2)}g {/* Fixed: Changed from totalMarketBalance */}
+        </span>
+      </div>
+      <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-lg">
+        <span className="text-sm font-medium text-emerald-700">Total Cash (KWD)</span>
+        <span className="font-mono font-bold text-emerald-700 text-sm sm:text-base">
+          {totalMarketCash.toFixed(3)} KD
+        </span>
+      </div>
 
-              {/* Vendor Balances */}
-              {vendors.length > 0 && (
-                <div className="mt-3 sm:mt-4">
-                  <h4 className="text-sm font-medium text-amber-700 mb-2">Vendor Balances</h4>
-                  <div className="space-y-2 max-h-24 sm:max-h-32 overflow-y-auto">
-                    {vendors.map((vendor) => {
-                      const balance = getVendorRemainingBalance(vendor)
-                      return balance > 0 ? (
-                        <div key={vendor} className="flex justify-between items-center text-xs p-2 bg-amber-50 rounded">
-                          <span className="text-amber-700 truncate flex-1">{vendor}</span>
-                          <span className="font-mono text-amber-700 shrink-0 ml-2">
-                            {balance.toFixed(2)}g
-                          </span>
-                        </div>
-                      ) : null
-                    })}
-                    {vendors.filter(v => getVendorRemainingBalance(v) > 0).length === 0 && (
-                      <div className="text-center py-2 text-amber-600 text-xs">
-                        No vendor balances
-                      </div>
-                    )}
+      {/* Vendor Balances */}
+      {vendors.length > 0 && (
+        <div className="mt-3 sm:mt-4">
+          <h4 className="text-sm font-medium text-amber-700 mb-2">Detailed Vendor List</h4>
+          <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+            {vendors.map((vendor) => {
+              const balance = getVendorRemainingBalance(vendor);
+              // Extract values safely
+              const g = typeof balance === 'object' ? balance.gold : balance;
+              const c = typeof balance === 'object' ? balance.cash : 0;
+
+              return (g !== 0 || c !== 0) ? (
+                <div key={vendor} className="p-2 bg-slate-50 border rounded text-xs">
+                  <div className="flex justify-between mb-1">
+                    <span className="font-bold text-slate-700">{vendor}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Gold: <span className="font-mono font-semibold">{g.toFixed(2)}g</span></span>
+                    <span>Cash: <span className="font-mono font-semibold text-emerald-700">{c.toFixed(3)} KD</span></span>
                   </div>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              ) : null;
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  </CardContent>
+</Card>
       </motion.div>
     </div>
   )
